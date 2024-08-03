@@ -1,0 +1,130 @@
+"use client";
+
+import { useState, useMemo } from "react";
+import {
+  Box,
+  Button,
+  Table,
+  Thead,
+  Tbody,
+  Tr,
+  Th,
+  Td,
+  Input,
+  VStack,
+  Heading,
+} from "@chakra-ui/react";
+
+interface RowData {
+  date: string;
+  description: string;
+  withdraw: string;
+  recieved: string;
+}
+
+const Office = () => {
+  const [rows, setRows] = useState<RowData[]>([]);
+
+  const addRow = () => {
+    setRows([
+      { date: getFormattedDate(), description: "", withdraw: "0", recieved: "0" },
+      ...rows,
+    ]);
+  };
+
+  const handleInputChange = (index: number, field: keyof RowData, value: string) => {
+    const newRows = [...rows];
+    newRows[index][field] = value;
+    setRows(newRows);
+  };
+
+  const deleteRow = (index: number) => {
+    const newRows = rows.filter((_, i) => i !== index);
+    setRows(newRows);
+  };
+
+  const getFormattedDate = (): string => {
+    const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    const date = new Date();
+    const day = date.getDate();
+    const month = months[date.getMonth()];
+    const year = date.getFullYear();
+    return `${day} ${month} ${year}`;
+  };
+
+  const calculateBalance = (): number => {
+    const totalReceived = rows.reduce((sum, row) => sum + (parseFloat(row.recieved) || 0), 0);
+    const totalWithdraw = rows.reduce((sum, row) => sum + (parseFloat(row.withdraw) || 0), 0);
+    return totalReceived - totalWithdraw;
+  };
+
+  const balance = useMemo(calculateBalance, [rows]);
+
+  return (
+    <Box p={4}>
+      <Heading textAlign="center" mb={7} size="xl">
+        Office Expenses
+      </Heading>
+      <Heading textAlign="center" mb={4} size="md">
+        Office Balance: {balance.toFixed(2)}
+      </Heading>
+      <VStack align="start">
+        <Button onClick={addRow} colorScheme="purple">Add expense</Button>
+        <Table variant="simple" size="sm">
+          <Thead>
+            <Tr>
+              <Th>Date</Th>
+              <Th>Description</Th>
+              <Th>Withdraw</Th>
+              <Th>Recieved</Th>
+              <Th>Delete</Th>
+            </Tr>
+          </Thead>
+          <Tbody>
+            {rows.map((row, index) => (
+              <Tr key={index}>
+                <Td>
+                  <Input
+                    value={row.date}
+                    onChange={(e) => handleInputChange(index, 'date', e.target.value)}
+                    borderColor="black"
+                    _focus={{ boxShadow: "none", borderColor: "black" }}
+                  />
+                </Td>
+                <Td>
+                  <Input
+                    value={row.description}
+                    onChange={(e) => handleInputChange(index, 'description', e.target.value)}
+                    borderColor="black"
+                    _focus={{ boxShadow: "none", borderColor: "black" }}
+                  />
+                </Td>
+                <Td>
+                  <Input
+                    value={row.withdraw}
+                    onChange={(e) => handleInputChange(index, 'withdraw', e.target.value)}
+                    borderColor="black"
+                    _focus={{ boxShadow: "none", borderColor: "black" }}
+                  />
+                </Td>
+                <Td>
+                  <Input
+                    value={row.recieved}
+                    onChange={(e) => handleInputChange(index, 'recieved', e.target.value)}
+                    borderColor="black"
+                    _focus={{ boxShadow: "none", borderColor: "black" }}
+                  />
+                </Td>
+                <Td>
+                  <Button colorScheme="red" onClick={() => deleteRow(index)}>Delete</Button>
+                </Td>
+              </Tr>
+            ))}
+          </Tbody>
+        </Table>
+      </VStack>
+    </Box>
+  );
+}
+
+export default Office;
