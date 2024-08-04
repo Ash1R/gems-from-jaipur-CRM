@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import {
   Box,
   Button,
@@ -16,20 +16,44 @@ import {
 } from "@chakra-ui/react";
 
 interface RowData {
+  id?: number;
   date: string;
   description: string;
   withdraw: string;
-  recieved: string;
+  received: string;
 }
 
 const Office = () => {
   const [rows, setRows] = useState<RowData[]>([]);
 
-  const addRow = () => {
-    setRows([
-      { date: getFormattedDate(), description: "", withdraw: "0", recieved: "0" },
-      ...rows,
-    ]);
+  useEffect(() => {
+    const fetchRows = async () => {
+      const response = await fetch("/api/expenses");
+      const data = await response.json();
+      setRows(data);
+    };
+
+    fetchRows();
+  }, []);
+
+  const addRow = async () => {
+    const newRow: RowData = {
+      date: getFormattedDate(),
+      description: "",
+      withdraw: "0",
+      received: "0",
+    };
+
+    const response = await fetch("/api/expenses", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(newRow),
+    });
+
+    const savedRow = await response.json();
+    setRows([savedRow, ...rows]);
   };
 
   const handleInputChange = (index: number, field: keyof RowData, value: string) => {
@@ -38,7 +62,13 @@ const Office = () => {
     setRows(newRows);
   };
 
-  const deleteRow = (index: number) => {
+  const deleteRow = async (index: number) => {
+    const rowToDelete = rows[index];
+
+    await fetch(`/api/expenses/${rowToDelete.id}`, {
+      method: "DELETE",
+    });
+
     const newRows = rows.filter((_, i) => i !== index);
     setRows(newRows);
   };
@@ -53,7 +83,7 @@ const Office = () => {
   };
 
   const calculateBalance = (): number => {
-    const totalReceived = rows.reduce((sum, row) => sum + (parseFloat(row.recieved) || 0), 0);
+    const totalReceived = rows.reduce((sum, row) => sum + (parseFloat(row.received) || 0), 0);
     const totalWithdraw = rows.reduce((sum, row) => sum + (parseFloat(row.withdraw) || 0), 0);
     return totalReceived - totalWithdraw;
   };
@@ -76,7 +106,7 @@ const Office = () => {
               <Th>Date</Th>
               <Th>Description</Th>
               <Th>Withdraw</Th>
-              <Th>Recieved</Th>
+              <Th>Received</Th>
               <Th>Delete</Th>
             </Tr>
           </Thead>
@@ -109,8 +139,8 @@ const Office = () => {
                 </Td>
                 <Td>
                   <Input
-                    value={row.recieved}
-                    onChange={(e) => handleInputChange(index, 'recieved', e.target.value)}
+                    value={row.received}
+                    onChange={(e) => handleInputChange(index, 'received', e.target.value)}
                     borderColor="black"
                     _focus={{ boxShadow: "none", borderColor: "black" }}
                   />
