@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import prisma from '../../lib/prisma';
+import prisma from '../../lib/prisma'; // Make sure the import path is correct
 
 export async function GET(request: NextRequest) {
   const expenses = await prisma.expense.findMany({
