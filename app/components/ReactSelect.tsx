@@ -5,10 +5,15 @@ import { chakra } from '@chakra-ui/react';
 
 const ChakraCreatableSelect = chakra(CreatableSelect);
 
+interface Option {
+  value: string;
+  label: string;
+}
+
 interface ReactSelectProps {
-  options: { value: string; label: string }[];
-  value: { value: string; label: string };
-  onChange: (value: { value: string; label: string }) => void;
+  options: Option[];
+  value: Option | null;
+  onChange: (value: Option | null) => void;
   placeholder?: string; // Add the placeholder prop
 }
 
@@ -17,7 +22,7 @@ const ReactSelect: React.FC<ReactSelectProps> = ({ options, value, onChange, pla
     <ChakraCreatableSelect
       options={options}
       value={value}
-      onChange={(selectedOption) => onChange(selectedOption || { value: '', label: '' })}
+      onChange={(selectedOption) => onChange(selectedOption as Option | null)}
       isClearable
       placeholder={placeholder} // Pass the placeholder prop
     />
