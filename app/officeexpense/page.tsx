@@ -29,7 +29,7 @@ const Office = () => {
   useEffect(() => {
     const fetchRows = async () => {
       const response = await fetch('/api/expenses');
-      const data = await response.json();
+      const data: RowData[] = await response.json();
       setRows(data);
     };
 
@@ -52,7 +52,7 @@ const Office = () => {
       body: JSON.stringify(newRow),
     });
 
-    const savedRow = await response.json();
+    const savedRow: RowData = await response.json();
     setRows([savedRow, ...rows]);
   };
 
@@ -76,9 +76,11 @@ const Office = () => {
   const deleteRow = async (index: number) => {
     const rowToDelete = rows[index];
 
-    await fetch(`/api/expenses?id=${rowToDelete.id}`, {
-      method: 'DELETE',
-    });
+    if (rowToDelete.id) {
+      await fetch(`/api/expenses?id=${rowToDelete.id}`, {
+        method: 'DELETE',
+      });
+    }
 
     const newRows = rows.filter((_, i) => i !== index);
     setRows(newRows);
@@ -125,7 +127,7 @@ const Office = () => {
           </Thead>
           <Tbody>
             {rows.map((row, index) => (
-              <Tr key={index}>
+              <Tr key={row.id || index}>
                 <Td>
                   <Input
                     value={row.date}
