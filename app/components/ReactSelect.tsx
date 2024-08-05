@@ -5,7 +5,7 @@ import { chakra } from '@chakra-ui/react';
 
 const ChakraCreatableSelect = chakra(CreatableSelect);
 
-interface Option {
+export interface Option {
   value: string;
   label: string;
 }

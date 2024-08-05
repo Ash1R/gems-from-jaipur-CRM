@@ -25,9 +25,9 @@ import {
   Center,
   Stack,
 } from '@chakra-ui/react';
-import { useForm, Controller } from 'react-hook-form';
+import { useForm, Controller, UseFormReturn } from 'react-hook-form';
 import { DeleteIcon } from '@chakra-ui/icons';
-import ReactSelect from './ReactSelect';
+import ReactSelect, { Option } from './ReactSelect';
 
 interface JobCardProps {
   id: string;
@@ -35,37 +35,67 @@ interface JobCardProps {
   onDelete: () => void;
 }
 
-const initialOptions = [
+const initialOptions: Option[] = [
   { value: 'Option1', label: 'Option1' },
   { value: 'Option2', label: 'Option2' },
 ];
 
-const editOptions = [
+const editOptions: Option[] = [
   { value: 'Polish', label: 'Polish' },
   { value: 'Step2', label: 'Step2' },
   { value: 'Step3', label: 'Step3' },
 ];
 
-const diamondQualityOptions = [
+const diamondQualityOptions: Option[] = [
   { value: 'Quality1', label: 'Quality1' },
   { value: 'Quality2', label: 'Quality2' },
 ];
+
+interface CastingData {
+  date: string;
+  caster: string;
+  goldSilver: string;
+  castingWeight: string;
+  pureWeight: string;
+}
+
+interface EditData {
+  stepType: string;
+  weightBefore: string;
+  weightAfter: string;
+  polishGuy: string;
+}
+
+interface DiamondData {
+  setterName: string;
+  beforeWeight: string;
+  afterWeight: string;
+  diamondWeight: string;
+  diamondQuality: string;
+  settingDustWeight: string;
+  totalLoss: string;
+  totalNumberDiamondSet: string;
+  totalCt: string;
+  returnCt: string;
+  brokenDiamondNumber: string;
+  brokenDiamondCt: string;
+}
 
 const JobCard: React.FC<JobCardProps> = ({ id, name, onDelete }) => {
   const [expanded, setExpanded] = useState(false);
   const { isOpen: isCastingOpen, onOpen: onCastingOpen, onClose: onCastingClose } = useDisclosure();
   const { isOpen: isEditOpen, onOpen: onEditOpen, onClose: onEditClose } = useDisclosure();
   const { isOpen: isDiamondOpen, onOpen: onDiamondOpen, onClose: onDiamondClose } = useDisclosure();
-  const [castingData, setCastingData] = useState<any[]>([]);
-  const [editData, setEditData] = useState<any[]>([]);
-  const [diamondData, setDiamondData] = useState<any[]>([]);
+  const [castingData, setCastingData] = useState<CastingData[]>([]);
+  const [editData, setEditData] = useState<EditData[]>([]);
+  const [diamondData, setDiamondData] = useState<DiamondData[]>([]);
   const [orderedDiamondsData, setOrderedDiamondsData] = useState<any[]>([]);
 
-  const { control, handleSubmit, reset } = useForm({
+  const { control, handleSubmit, reset } = useForm<CastingData>({
     defaultValues: {
       date: new Date().toISOString().substring(0, 10),
-      caster: null,
-      goldSilver: null,
+      caster: '',
+      goldSilver: '',
       castingWeight: '',
       pureWeight: '',
     },
@@ -76,9 +106,9 @@ const JobCard: React.FC<JobCardProps> = ({ id, name, onDelete }) => {
     handleSubmit: handleEditSubmit,
     watch,
     reset: editReset,
-  } = useForm({
+  } = useForm<EditData>({
     defaultValues: {
-      stepType: null,
+      stepType: '',
       weightBefore: '',
       weightAfter: '',
       polishGuy: '',
@@ -89,13 +119,13 @@ const JobCard: React.FC<JobCardProps> = ({ id, name, onDelete }) => {
     control: diamondControl,
     handleSubmit: handleDiamondSubmit,
     reset: diamondReset,
-  } = useForm({
+  } = useForm<DiamondData>({
     defaultValues: {
       setterName: '',
       beforeWeight: '',
       afterWeight: '',
       diamondWeight: '',
-      diamondQuality: null,
+      diamondQuality: '',
       settingDustWeight: '',
       totalLoss: '',
       totalNumberDiamondSet: '',
@@ -108,13 +138,13 @@ const JobCard: React.FC<JobCardProps> = ({ id, name, onDelete }) => {
 
   const stepType = watch('stepType');
 
-  const handleAddCasting = (data) => {
+  const handleAddCasting = (data: CastingData) => {
     setCastingData((prevCastingData) => [
       ...prevCastingData,
       {
         date: data.date,
-        caster: data.caster.label,
-        goldSilver: data.goldSilver.label,
+        caster: data.caster,
+        goldSilver: data.goldSilver,
         castingWeight: data.castingWeight,
         pureWeight: data.pureWeight,
       },
@@ -124,11 +154,11 @@ const JobCard: React.FC<JobCardProps> = ({ id, name, onDelete }) => {
     onCastingClose();
   };
 
-  const handleAddEdit = (data) => {
+  const handleAddEdit = (data: EditData) => {
     setEditData((prevEditData) => [
       ...prevEditData,
       {
-        stepType: data.stepType.label,
+        stepType: data.stepType,
         weightBefore: data.weightBefore,
         weightAfter: data.weightAfter,
         polishGuy: data.polishGuy,
@@ -139,7 +169,7 @@ const JobCard: React.FC<JobCardProps> = ({ id, name, onDelete }) => {
     onEditClose();
   };
 
-  const handleAddDiamond = (data) => {
+  const handleAddDiamond = (data: DiamondData) => {
     setDiamondData((prevDiamondData) => [
       ...prevDiamondData,
       {
@@ -147,7 +177,7 @@ const JobCard: React.FC<JobCardProps> = ({ id, name, onDelete }) => {
         beforeWeight: data.beforeWeight,
         afterWeight: data.afterWeight,
         diamondWeight: data.diamondWeight,
-        diamondQuality: data.diamondQuality.label,
+        diamondQuality: data.diamondQuality,
         settingDustWeight: data.settingDustWeight,
         totalLoss: data.totalLoss,
         totalNumberDiamondSet: data.totalNumberDiamondSet,
@@ -162,7 +192,7 @@ const JobCard: React.FC<JobCardProps> = ({ id, name, onDelete }) => {
     onDiamondClose();
   };
 
-  const handleDeleteRow = (index, setData) => {
+  const handleDeleteRow = (index: number, setData: React.Dispatch<React.SetStateAction<any[]>>) => {
     setData((prevData) => prevData.filter((_, i) => i !== index));
   };
 
@@ -434,7 +464,7 @@ const JobCard: React.FC<JobCardProps> = ({ id, name, onDelete }) => {
                     />
                   )}
                 />
-                {stepType?.value === 'Polish' && (
+                {stepType === 'Polish' && (
                   <Controller
                     name="polishGuy"
                     control={editControl}

@@ -2,11 +2,11 @@
 'use client';
 import { useState } from 'react';
 import { Box, VStack, HStack, Text, Heading, Divider } from '@chakra-ui/react';
-import ReactSelect from '../components/ReactSelect';
+import ReactSelect, { Option } from '../components/ReactSelect';
 import JobCard from '../components/JobCard';
 import NewJobForm from '../components/NewJobForm';
 
-const initialOptions = [
+const initialOptions: Option[] = [
   { value: "Gold", label: "Gold" },
   { value: "Silver", label: "Silver" },
   { value: "Platinum", label: "Platinum" },
@@ -15,8 +15,8 @@ const initialOptions = [
 
 const IndexPage = () => {
   const [jobs, setJobs] = useState<{ id: string; name: string }[]>([]);
-  const [selectedId, setSelectedId] = useState<{ value: string; label: string } | null>(null);
-  const [selectedName, setSelectedName] = useState<{ value: string; label: string } | null>(null);
+  const [selectedId, setSelectedId] = useState<Option | null>(null);
+  const [selectedName, setSelectedName] = useState<Option | null>(null);
   const [options, setOptions] = useState(initialOptions);
 
   const handleAddJob = (id: string, name: string) => {
@@ -66,7 +66,7 @@ const IndexPage = () => {
             Jobs
           </Heading>
           {jobs.map((job, index) => (
-            <JobCard key={index} id={job.id} name={job.name} />
+            <JobCard key={index} id={job.id} name={job.name} onDelete={() => {}} />
           ))}
         </VStack>
       </HStack>
