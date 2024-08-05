@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo } from 'react';
 import {
   Box,
   Button,
@@ -13,7 +13,7 @@ import {
   Input,
   VStack,
   Heading,
-} from "@chakra-ui/react";
+} from '@chakra-ui/react';
 
 interface RowData {
   id?: number;
@@ -28,7 +28,7 @@ const Office = () => {
 
   useEffect(() => {
     const fetchRows = async () => {
-      const response = await fetch("/api/expenses");
+      const response = await fetch('/api/expenses');
       const data = await response.json();
       setRows(data);
     };
@@ -39,15 +39,15 @@ const Office = () => {
   const addRow = async () => {
     const newRow: RowData = {
       date: getFormattedDate(),
-      description: "",
-      withdraw: "0",
-      received: "0",
+      description: '',
+      withdraw: '0',
+      received: '0',
     };
 
-    const response = await fetch("/api/expenses", {
-      method: "POST",
+    const response = await fetch('/api/expenses', {
+      method: 'POST',
       headers: {
-        "Content-Type": "application/json",
+        'Content-Type': 'application/json',
       },
       body: JSON.stringify(newRow),
     });
@@ -56,17 +56,28 @@ const Office = () => {
     setRows([savedRow, ...rows]);
   };
 
-  const handleInputChange = (index: number, field: keyof RowData, value: string) => {
+  const handleInputChange = async (index: number, field: keyof RowData, value: string) => {
     const newRows = [...rows];
     newRows[index][field] = value;
     setRows(newRows);
+
+    const updatedRow = newRows[index];
+    if (updatedRow.id) {
+      await fetch(`/api/expenses/${updatedRow.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(updatedRow),
+      });
+    }
   };
 
   const deleteRow = async (index: number) => {
     const rowToDelete = rows[index];
 
-    await fetch(`/api/expenses/${rowToDelete.id}`, {
-      method: "DELETE",
+    await fetch(`/api/expenses?id=${rowToDelete.id}`, {
+      method: 'DELETE',
     });
 
     const newRows = rows.filter((_, i) => i !== index);
@@ -74,7 +85,7 @@ const Office = () => {
   };
 
   const getFormattedDate = (): string => {
-    const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
     const date = new Date();
     const day = date.getDate();
     const month = months[date.getMonth()];
@@ -99,7 +110,9 @@ const Office = () => {
         Office Balance: {balance.toFixed(2)}
       </Heading>
       <VStack align="start">
-        <Button onClick={addRow} colorScheme="purple">Add expense</Button>
+        <Button onClick={addRow} colorScheme="purple">
+          Add expense
+        </Button>
         <Table variant="simple" size="sm">
           <Thead>
             <Tr>
@@ -118,7 +131,7 @@ const Office = () => {
                     value={row.date}
                     onChange={(e) => handleInputChange(index, 'date', e.target.value)}
                     borderColor="black"
-                    _focus={{ boxShadow: "none", borderColor: "black" }}
+                    _focus={{ boxShadow: 'none', borderColor: 'black' }}
                   />
                 </Td>
                 <Td>
@@ -126,7 +139,7 @@ const Office = () => {
                     value={row.description}
                     onChange={(e) => handleInputChange(index, 'description', e.target.value)}
                     borderColor="black"
-                    _focus={{ boxShadow: "none", borderColor: "black" }}
+                    _focus={{ boxShadow: 'none', borderColor: 'black' }}
                   />
                 </Td>
                 <Td>
@@ -134,7 +147,7 @@ const Office = () => {
                     value={row.withdraw}
                     onChange={(e) => handleInputChange(index, 'withdraw', e.target.value)}
                     borderColor="black"
-                    _focus={{ boxShadow: "none", borderColor: "black" }}
+                    _focus={{ boxShadow: 'none', borderColor: 'black' }}
                   />
                 </Td>
                 <Td>
@@ -142,11 +155,13 @@ const Office = () => {
                     value={row.received}
                     onChange={(e) => handleInputChange(index, 'received', e.target.value)}
                     borderColor="black"
-                    _focus={{ boxShadow: "none", borderColor: "black" }}
+                    _focus={{ boxShadow: 'none', borderColor: 'black' }}
                   />
                 </Td>
                 <Td>
-                  <Button colorScheme="red" onClick={() => deleteRow(index)}>Delete</Button>
+                  <Button colorScheme="red" onClick={() => deleteRow(index)}>
+                    Delete
+                  </Button>
                 </Td>
               </Tr>
             ))}
@@ -155,6 +170,6 @@ const Office = () => {
       </VStack>
     </Box>
   );
-}
+};
 
 export default Office;
