@@ -56,9 +56,16 @@ const Office = () => {
     setRows([savedRow, ...rows]);
   };
 
-  const handleInputChange = async (index: number, field: keyof RowData, value: string) => {
+  const handleInputChange = async (
+    index: number,
+    field: keyof RowData,
+    value: string
+  ) => {
     const newRows = [...rows];
-    newRows[index][field] = value;
+    newRows[index] = {
+      ...newRows[index],
+      [field]: value,
+    };
     setRows(newRows);
 
     const updatedRow = newRows[index];
@@ -87,7 +94,10 @@ const Office = () => {
   };
 
   const getFormattedDate = (): string => {
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const months = [
+      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+    ];
     const date = new Date();
     const day = date.getDate();
     const month = months[date.getMonth()];
