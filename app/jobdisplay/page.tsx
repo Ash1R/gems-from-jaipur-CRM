@@ -15,8 +15,8 @@ const initialOptions = [
 
 const IndexPage = () => {
   const [jobs, setJobs] = useState<{ id: string; name: string }[]>([]);
-  const [selectedId, setSelectedId] = useState('');
-  const [selectedName, setSelectedName] = useState('');
+  const [selectedId, setSelectedId] = useState<{ value: string; label: string } | null>(null);
+  const [selectedName, setSelectedName] = useState<{ value: string; label: string } | null>(null);
   const [options, setOptions] = useState(initialOptions);
 
   const handleAddJob = (id: string, name: string) => {
@@ -30,33 +30,30 @@ const IndexPage = () => {
         {/* Left Section */}
         <VStack align="start" spacing={8} w="30%">
           {/* Search Section */}
-          
-
           <Box>
-          <Text mb={2}>Search:</Text>
-          <HStack spacing={4}>
-            <VStack spacing={4}>
-              <Box w="full">
-                <Text>ID:</Text>
-                <ReactSelect
-                  options={options}
-                  value={selectedId}
-                  onChange={setSelectedId}
-                  placeholder="Select ID"
-                />
-              </Box>
-              <Box w="full">
-                <Text>Name:</Text>
-                <ReactSelect
-                  options={options}
-                  value={selectedName}
-                  onChange={setSelectedName}
-                  placeholder="Select Name"
-                />
-              </Box>
-            </VStack>
+            <Text mb={2}>Search:</Text>
+            <HStack spacing={4}>
+              <VStack spacing={4}>
+                <Box w="full">
+                  <Text>ID:</Text>
+                  <ReactSelect
+                    options={options}
+                    value={selectedId}
+                    onChange={setSelectedId}
+                    placeholder="Select ID" // Pass the placeholder prop
+                  />
+                </Box>
+                <Box w="full">
+                  <Text>Name:</Text>
+                  <ReactSelect
+                    options={options}
+                    value={selectedName}
+                    onChange={setSelectedName}
+                    placeholder="Select Name" // Pass the placeholder prop
+                  />
+                </Box>
+              </VStack>
             </HStack>
-            
           </Box>
 
           {/* New Job Form */}
@@ -65,9 +62,9 @@ const IndexPage = () => {
 
         {/* Right Section */}
         <VStack spacing={4} w="70%">
-        <Heading textAlign="center" mb={7} size="xl">
-        Jobs
-      </Heading>
+          <Heading textAlign="center" mb={7} size="xl">
+            Jobs
+          </Heading>
           {jobs.map((job, index) => (
             <JobCard key={index} id={job.id} name={job.name} />
           ))}
