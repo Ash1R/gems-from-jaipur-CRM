@@ -1,6 +1,7 @@
-"use client";
+// pages/MetalInput.tsx
+'use client';
 
-import { useState } from "react";
+import { useState } from 'react';
 import {
   Box,
   Button,
@@ -14,33 +15,29 @@ import {
   VStack,
   Heading
 } from "@chakra-ui/react";
-import ReactSelect from '../components/ReactSelect';
+import ReactSelect, { Option } from '../components/ReactSelect';
 
 interface RowData {
   date: string;
-  metalType: string;
+  metalType: Option | null;
   rate: string;
   grams: string;
   amount: string;
-  vendor: string;
+  vendor: Option | null;
   paid: string;
 }
 
-const metalTypes = [
+const metalTypes: Option[] = [
   { value: "Gold", label: "Gold" },
   { value: "Silver", label: "Silver" },
   { value: "", label: "" },
-
-  
 ];
 
-const vendorTypes = [
+const vendorTypes: Option[] = [
   { value: "Swastik Enterprises", label: "Swastik Enterprises" },
   { value: "Pioneer Corporation", label: "Pioneer Corporation" },
   { value: "Narnoli Corporation", label: "Narnoli Corporation" },
-
   { value: "", label: "" },
-
 ];
 
 const MetalInput = () => {
@@ -48,12 +45,12 @@ const MetalInput = () => {
 
   const addRow = () => {
     setRows([
-      { date: getFormattedDate(), metalType: "", rate: "", grams: "", amount: "", vendor: "", paid: "" },
+      { date: getFormattedDate(), metalType: null, rate: "", grams: "", amount: "", vendor: null, paid: "" },
       ...rows,
     ]);
   };
 
-  const handleInputChange = (index: number, field: keyof RowData, value: string) => {
+  const handleInputChange = (index: number, field: keyof RowData, value: any) => {
     const newRows = [...rows];
     newRows[index][field] = value;
     setRows(newRows);
@@ -71,7 +68,7 @@ const MetalInput = () => {
     const month = months[date.getMonth()];
     const year = date.getFullYear();
     return `${day} ${month} ${year}`;
-}
+  }
 
   return (
     <Box p={4}>
@@ -109,6 +106,7 @@ const MetalInput = () => {
                     options={metalTypes}
                     value={row.metalType}
                     onChange={(value) => handleInputChange(index, 'metalType', value)}
+                    placeholder="Select Metal Type"
                   />
                 </Td>
                 <Td>
@@ -140,6 +138,7 @@ const MetalInput = () => {
                     options={vendorTypes}
                     value={row.vendor}
                     onChange={(value) => handleInputChange(index, 'vendor', value)}
+                    placeholder="Select Vendor"
                   />
                 </Td>
                 <Td>
