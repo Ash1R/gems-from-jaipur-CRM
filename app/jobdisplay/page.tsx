@@ -40,7 +40,7 @@ const IndexPage = () => {
                     options={options}
                     value={selectedId}
                     onChange={setSelectedId}
-                    placeholder="Select ID" // Pass the placeholder prop
+                    placeholder="Select ID"
                   />
                 </Box>
                 <Box w="full">
@@ -49,7 +49,7 @@ const IndexPage = () => {
                     options={options}
                     value={selectedName}
                     onChange={setSelectedName}
-                    placeholder="Select Name" // Pass the placeholder prop
+                    placeholder="Select Name"
                   />
                 </Box>
               </VStack>

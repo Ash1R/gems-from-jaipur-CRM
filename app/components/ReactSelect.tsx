@@ -14,7 +14,7 @@ interface ReactSelectProps {
   options: Option[];
   value: Option | null;
   onChange: (value: Option | null) => void;
-  placeholder?: string; // Add the placeholder prop
+  placeholder?: string;
 }
 
 const ReactSelect: React.FC<ReactSelectProps> = ({ options, value, onChange, placeholder }) => {
@@ -24,7 +24,7 @@ const ReactSelect: React.FC<ReactSelectProps> = ({ options, value, onChange, pla
       value={value}
       onChange={(selectedOption) => onChange(selectedOption as Option | null)}
       isClearable
-      placeholder={placeholder} // Pass the placeholder prop
+      placeholder={placeholder}
     />
   );
 };

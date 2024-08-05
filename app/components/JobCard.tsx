@@ -64,8 +64,8 @@ const JobCard: React.FC<JobCardProps> = ({ id, name, onDelete }) => {
   const { control, handleSubmit, reset } = useForm({
     defaultValues: {
       date: new Date().toISOString().substring(0, 10),
-      caster: '',
-      goldSilver: '',
+      caster: null,
+      goldSilver: null,
       castingWeight: '',
       pureWeight: '',
     },
@@ -78,7 +78,7 @@ const JobCard: React.FC<JobCardProps> = ({ id, name, onDelete }) => {
     reset: editReset,
   } = useForm({
     defaultValues: {
-      stepType: '',
+      stepType: null,
       weightBefore: '',
       weightAfter: '',
       polishGuy: '',
@@ -95,7 +95,7 @@ const JobCard: React.FC<JobCardProps> = ({ id, name, onDelete }) => {
       beforeWeight: '',
       afterWeight: '',
       diamondWeight: '',
-      diamondQuality: '',
+      diamondQuality: null,
       settingDustWeight: '',
       totalLoss: '',
       totalNumberDiamondSet: '',
@@ -342,7 +342,8 @@ const JobCard: React.FC<JobCardProps> = ({ id, name, onDelete }) => {
                   render={({ field }) => (
                     <ReactSelect
                       options={initialOptions}
-                      {...field}
+                      value={initialOptions.find(option => option.value === field.value) || null}
+                      onChange={(value) => field.onChange(value?.value || '')}
                       placeholder="Select Caster"
                     />
                   )}
@@ -353,7 +354,8 @@ const JobCard: React.FC<JobCardProps> = ({ id, name, onDelete }) => {
                   render={({ field }) => (
                     <ReactSelect
                       options={initialOptions}
-                      {...field}
+                      value={initialOptions.find(option => option.value === field.value) || null}
+                      onChange={(value) => field.onChange(value?.value || '')}
                       placeholder="Gold Ct./Silver"
                     />
                   )}
@@ -406,7 +408,8 @@ const JobCard: React.FC<JobCardProps> = ({ id, name, onDelete }) => {
                   render={({ field }) => (
                     <ReactSelect
                       options={editOptions}
-                      {...field}
+                      value={editOptions.find(option => option.value === field.value) || null}
+                      onChange={(value) => field.onChange(value?.value || '')}
                       placeholder="Type of Step"
                     />
                   )}
@@ -511,7 +514,8 @@ const JobCard: React.FC<JobCardProps> = ({ id, name, onDelete }) => {
                   render={({ field }) => (
                     <ReactSelect
                       options={diamondQualityOptions}
-                      {...field}
+                      value={diamondQualityOptions.find(option => option.value === field.value) || null}
+                      onChange={(value) => field.onChange(value?.value || '')}
                       placeholder="Diamond Quality"
                     />
                   )}
