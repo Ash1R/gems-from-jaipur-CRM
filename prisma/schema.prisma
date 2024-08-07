@@ -20,3 +20,33 @@ model Expense {
   withdraw    String
   received    String
 }
+
+model MetalPurchase {
+  id        Int     @id @default(autoincrement())
+  date      String
+  metalType String
+  rate      String
+  grams     String
+  amount    String
+  vendor    String
+  paid      String
+}
+
+model Invoice {
+  id            Int        @id @default(autoincrement())
+  invoiceNumber String
+  vendorName    String
+  purchases     Purchase[]
+}
+
+model Purchase {
+  id         Int      @id @default(autoincrement())
+  date       String
+  vendor     String
+  grams      String
+  weight     String
+  pricePerCt String
+  amount     String
+  invoiceId  Int
+  invoice    Invoice   @relation(fields: [invoiceId], references: [id])
+}

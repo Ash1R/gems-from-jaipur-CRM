@@ -1,7 +1,6 @@
-// pages/MetalInput.tsx
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Box,
   Button,
@@ -13,11 +12,12 @@ import {
   Td,
   Input,
   VStack,
-  Heading
-} from "@chakra-ui/react";
+  Heading,
+} from '@chakra-ui/react';
 import ReactSelect, { Option } from '../components/ReactSelect';
 
 interface RowData {
+  id?: number;
   date: string;
   metalType: Option | null;
   rate: string;
@@ -28,41 +28,127 @@ interface RowData {
 }
 
 const metalTypes: Option[] = [
-  { value: "Gold", label: "Gold" },
-  { value: "Silver", label: "Silver" },
-  { value: "", label: "" },
+  { value: 'Gold', label: 'Gold' },
+  { value: 'Silver', label: 'Silver' },
+  { value: '', label: '' },
 ];
 
 const vendorTypes: Option[] = [
-  { value: "Swastik Enterprises", label: "Swastik Enterprises" },
-  { value: "Pioneer Corporation", label: "Pioneer Corporation" },
-  { value: "Narnoli Corporation", label: "Narnoli Corporation" },
-  { value: "", label: "" },
+  { value: 'Swastik Enterprises', label: 'Swastik Enterprises' },
+  { value: 'Pioneer Corporation', label: 'Pioneer Corporation' },
+  { value: 'Narnoli Corporation', label: 'Narnoli Corporation' },
+  { value: '', label: '' },
 ];
 
 const MetalInput = () => {
   const [rows, setRows] = useState<RowData[]>([]);
 
-  const addRow = () => {
-    setRows([
-      { date: getFormattedDate(), metalType: null, rate: "", grams: "", amount: "", vendor: null, paid: "" },
-      ...rows,
-    ]);
+  useEffect(() => {
+    const fetchRows = async () => {
+      try {
+        console.log('Fetching data...');
+        const response = await fetch('/api/metal-purchases');
+        if (!response.ok) throw new Error('Failed to fetch data');
+        const data: RowData[] = await response.json();
+        console.log('Data fetched:', data);
+        setRows(data.map(d => ({
+          ...d,
+          metalType: metalTypes.find(m => m.value === d.metalType) || null,
+          vendor: vendorTypes.find(v => v.value === d.vendor) || null,
+        })));
+      } catch (error) {
+        console.error('Fetch error:', error);
+      }
+    };
+
+    fetchRows();
+  }, []);
+
+  const addRow = async () => {
+    const newRow: RowData = {
+      date: getFormattedDate(),
+      metalType: null,
+      rate: '',
+      grams: '',
+      amount: '',
+      vendor: null,
+      paid: '',
+    };
+
+    try {
+      console.log('Adding new row...');
+      const response = await fetch('/api/metal-purchases', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          ...newRow,
+          metalType: newRow.metalType?.value || '',
+          vendor: newRow.vendor?.value || '',
+        }),
+      });
+      if (!response.ok) throw new Error('Failed to add row');
+      const savedRow: RowData = await response.json();
+      console.log('New row added:', savedRow);
+      setRows([
+        { ...savedRow, metalType: null, vendor: null }, // Adjust for Option types
+        ...rows,
+      ]);
+    } catch (error) {
+      console.error('Add row error:', error);
+    }
   };
 
-  const handleInputChange = (index: number, field: keyof RowData, value: any) => {
+  const handleInputChange = async (index: number, field: keyof RowData, value: any) => {
     const newRows = [...rows];
-    newRows[index][field] = value;
+    newRows[index] = { ...newRows[index], [field]: value };
     setRows(newRows);
+
+    const updatedRow = newRows[index];
+    if (updatedRow.id) {
+      try {
+        console.log(`Updating row with id ${updatedRow.id}...`);
+        const response = await fetch('/api/metal-purchases', {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            ...updatedRow,
+            metalType: updatedRow.metalType?.value || '',
+            vendor: updatedRow.vendor?.value || '',
+          }),
+        });
+        if (!response.ok) throw new Error('Failed to update row');
+        console.log('Row updated:', updatedRow);
+      } catch (error) {
+        console.error('Update row error:', error);
+      }
+    }
   };
 
-  const deleteRow = (index: number) => {
+  const deleteRow = async (index: number) => {
+    const rowToDelete = rows[index];
+    if (rowToDelete.id) {
+      try {
+        console.log(`Deleting row with id ${rowToDelete.id}...`);
+        const response = await fetch(`/api/metal-purchases?id=${rowToDelete.id}`, {
+          method: 'DELETE',
+        });
+        if (!response.ok) throw new Error('Failed to delete row');
+        console.log('Row deleted:', rowToDelete.id);
+      } catch (error) {
+        console.error('Delete row error:', error);
+      }
+    }
+
     const newRows = rows.filter((_, i) => i !== index);
     setRows(newRows);
   };
 
   function getFormattedDate(): string {
-    const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
     const date = new Date();
     const day = date.getDate();
     const month = months[date.getMonth()];
@@ -76,7 +162,9 @@ const MetalInput = () => {
         Metal Purchases
       </Heading>
       <VStack align="start">
-        <Button onClick={addRow} colorScheme="purple">Add purchase</Button>
+        <Button onClick={addRow} colorScheme="purple">
+          Add purchase
+        </Button>
         <Table variant="simple" size="sm">
           <Thead>
             <Tr>
@@ -92,13 +180,13 @@ const MetalInput = () => {
           </Thead>
           <Tbody>
             {rows.map((row, index) => (
-              <Tr key={index}>
+              <Tr key={row.id || index}>
                 <Td>
                   <Input
                     value={row.date}
                     onChange={(e) => handleInputChange(index, 'date', e.target.value)}
                     borderColor="black"
-                    _focus={{ boxShadow: "none", borderColor: "black" }}
+                    _focus={{ boxShadow: 'none', borderColor: 'black' }}
                   />
                 </Td>
                 <Td>
@@ -114,7 +202,7 @@ const MetalInput = () => {
                     value={row.rate}
                     onChange={(e) => handleInputChange(index, 'rate', e.target.value)}
                     borderColor="black"
-                    _focus={{ boxShadow: "none", borderColor: "black" }}
+                    _focus={{ boxShadow: 'none', borderColor: 'black' }}
                   />
                 </Td>
                 <Td>
@@ -122,7 +210,7 @@ const MetalInput = () => {
                     value={row.grams}
                     onChange={(e) => handleInputChange(index, 'grams', e.target.value)}
                     borderColor="black"
-                    _focus={{ boxShadow: "none", borderColor: "black" }}
+                    _focus={{ boxShadow: 'none', borderColor: 'black' }}
                   />
                 </Td>
                 <Td>
@@ -130,7 +218,7 @@ const MetalInput = () => {
                     value={row.amount}
                     onChange={(e) => handleInputChange(index, 'amount', e.target.value)}
                     borderColor="black"
-                    _focus={{ boxShadow: "none", borderColor: "black" }}
+                    _focus={{ boxShadow: 'none', borderColor: 'black' }}
                   />
                 </Td>
                 <Td>
@@ -146,11 +234,13 @@ const MetalInput = () => {
                     value={row.paid}
                     onChange={(e) => handleInputChange(index, 'paid', e.target.value)}
                     borderColor="black"
-                    _focus={{ boxShadow: "none", borderColor: "black" }}
+                    _focus={{ boxShadow: 'none', borderColor: 'black' }}
                   />
                 </Td>
                 <Td>
-                  <Button colorScheme="red" onClick={() => deleteRow(index)}>Delete</Button>
+                  <Button colorScheme="red" onClick={() => deleteRow(index)}>
+                    Delete
+                  </Button>
                 </Td>
               </Tr>
             ))}
@@ -159,6 +249,6 @@ const MetalInput = () => {
       </VStack>
     </Box>
   );
-}
+};
 
 export default MetalInput;
