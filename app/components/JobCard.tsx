@@ -1,4 +1,3 @@
-// components/JobCard.tsx
 import React, { useState } from 'react';
 import {
   Box,
@@ -28,10 +27,14 @@ import {
 import { useForm, Controller, UseFormReturn } from 'react-hook-form';
 import { DeleteIcon } from '@chakra-ui/icons';
 import ReactSelect, { Option } from './ReactSelect';
+import axios from 'axios';
 
 interface JobCardProps {
   id: string;
   name: string;
+  castings: any[];
+  edits: any[];
+  diamonds: any[];
   onDelete: () => void;
 }
 
@@ -81,14 +84,14 @@ interface DiamondData {
   brokenDiamondCt: string;
 }
 
-const JobCard: React.FC<JobCardProps> = ({ id, name, onDelete }) => {
+const JobCard: React.FC<JobCardProps> = ({ id, name, castings, edits, diamonds, onDelete }) => {
   const [expanded, setExpanded] = useState(false);
   const { isOpen: isCastingOpen, onOpen: onCastingOpen, onClose: onCastingClose } = useDisclosure();
   const { isOpen: isEditOpen, onOpen: onEditOpen, onClose: onEditClose } = useDisclosure();
   const { isOpen: isDiamondOpen, onOpen: onDiamondOpen, onClose: onDiamondClose } = useDisclosure();
-  const [castingData, setCastingData] = useState<CastingData[]>([]);
-  const [editData, setEditData] = useState<EditData[]>([]);
-  const [diamondData, setDiamondData] = useState<DiamondData[]>([]);
+  const [castingData, setCastingData] = useState<CastingData[]>(castings);
+  const [editData, setEditData] = useState<EditData[]>(edits);
+  const [diamondData, setDiamondData] = useState<DiamondData[]>(diamonds);
   const [orderedDiamondsData, setOrderedDiamondsData] = useState<any[]>([]);
 
   const { control, handleSubmit, reset } = useForm<CastingData>({
@@ -139,61 +142,96 @@ const JobCard: React.FC<JobCardProps> = ({ id, name, onDelete }) => {
   const stepType = watch('stepType');
 
   const handleAddCasting = (data: CastingData) => {
-    setCastingData((prevCastingData) => [
-      ...prevCastingData,
-      {
-        date: data.date,
-        caster: data.caster,
-        goldSilver: data.goldSilver,
-        castingWeight: data.castingWeight,
-        pureWeight: data.pureWeight,
-      },
-    ]);
-
+    const newCasting = {
+      date: data.date,
+      caster: data.caster,
+      goldSilver: data.goldSilver,
+      castingWeight: data.castingWeight,
+      pureWeight: data.pureWeight,
+    };
+    console.log('Adding new casting:', newCasting);  // Log the data being sent
+    axios.post(`/api/jobs/${id}/castings`, newCasting)
+      .then(response => {
+        setCastingData([...castingData, response.data]);
+      })
+      .catch(error => {
+        console.error('Error adding casting:', error);  // Log the error
+      });
+  
     reset();
     onCastingClose();
   };
-
+  
   const handleAddEdit = (data: EditData) => {
-    setEditData((prevEditData) => [
-      ...prevEditData,
-      {
-        stepType: data.stepType,
-        weightBefore: data.weightBefore,
-        weightAfter: data.weightAfter,
-        polishGuy: data.polishGuy,
-      },
-    ]);
-
+    const newEdit = {
+      stepType: data.stepType,
+      weightBefore: data.weightBefore,
+      weightAfter: data.weightAfter,
+      polishGuy: data.polishGuy,
+    };
+    console.log('Adding new edit:', newEdit);  // Log the data being sent
+    axios.post(`/api/jobs/${id}/edits`, newEdit)
+      .then(response => {
+        setEditData([...editData, response.data]);
+      })
+      .catch(error => {
+        console.error('Error adding edit:', error);  // Log the error
+      });
+  
     editReset();
     onEditClose();
   };
-
+  
   const handleAddDiamond = (data: DiamondData) => {
-    setDiamondData((prevDiamondData) => [
-      ...prevDiamondData,
-      {
-        setterName: data.setterName,
-        beforeWeight: data.beforeWeight,
-        afterWeight: data.afterWeight,
-        diamondWeight: data.diamondWeight,
-        diamondQuality: data.diamondQuality,
-        settingDustWeight: data.settingDustWeight,
-        totalLoss: data.totalLoss,
-        totalNumberDiamondSet: data.totalNumberDiamondSet,
-        totalCt: data.totalCt,
-        returnCt: data.returnCt,
-        brokenDiamondNumber: data.brokenDiamondNumber,
-        brokenDiamondCt: data.brokenDiamondCt,
-      },
-    ]);
-
+    const newDiamond = {
+      setterName: data.setterName,
+      beforeWeight: data.beforeWeight,
+      afterWeight: data.afterWeight,
+      diamondWeight: data.diamondWeight,
+      diamondQuality: data.diamondQuality,
+      settingDustWeight: data.settingDustWeight,
+      totalLoss: data.totalLoss,
+      totalNumberDiamondSet: data.totalNumberDiamondSet,
+      totalCt: data.totalCt,
+      returnCt: data.returnCt,
+      brokenDiamondNumber: data.brokenDiamondNumber,
+      brokenDiamondCt: data.brokenDiamondCt,
+    };
+    console.log('Adding new diamond:', newDiamond);  // Log the data being sent
+    axios.post(`/api/jobs/${id}/diamonds`, newDiamond)
+      .then(response => {
+        setDiamondData([...diamondData, response.data]);
+      })
+      .catch(error => {
+        console.error('Error adding diamond:', error);  // Log the error
+      });
+  
     diamondReset();
     onDiamondClose();
   };
+  
 
-  const handleDeleteRow = (index: number, setData: React.Dispatch<React.SetStateAction<any[]>>) => {
-    setData((prevData) => prevData.filter((_, i) => i !== index));
+  const handleDeleteRow = (index: number, setData: React.Dispatch<React.SetStateAction<any[]>>, dataType: 'casting' | 'edit' | 'diamond') => {
+    let newData;
+    if (dataType === 'casting') {
+      newData = castingData.filter((_, i) => i !== index);
+      axios.post('/api/jobs', { id, name, castings: newData, edits: editData, diamonds: diamondData })
+        .then(response => {
+          setCastingData(response.data.castings);
+        });
+    } else if (dataType === 'edit') {
+      newData = editData.filter((_, i) => i !== index);
+      axios.post('/api/jobs', { id, name, castings: castingData, edits: newData, diamonds: diamondData })
+        .then(response => {
+          setEditData(response.data.edits);
+        });
+    } else if (dataType === 'diamond') {
+      newData = diamondData.filter((_, i) => i !== index);
+      axios.post('/api/jobs', { id, name, castings: castingData, edits: editData, diamonds: newData })
+        .then(response => {
+          setDiamondData(response.data.diamonds);
+        });
+    }
   };
 
   return (
@@ -250,7 +288,7 @@ const JobCard: React.FC<JobCardProps> = ({ id, name, onDelete }) => {
                   <Td>{data.castingWeight}</Td>
                   <Td>{data.pureWeight}</Td>
                   <Td>
-                    <Button colorScheme="red" size="sm" onClick={() => handleDeleteRow(index, setCastingData)}>Delete</Button>
+                    <Button colorScheme="red" size="sm" onClick={() => handleDeleteRow(index, setCastingData, 'casting')}>Delete</Button>
                   </Td>
                 </Tr>
               ))}
@@ -276,7 +314,7 @@ const JobCard: React.FC<JobCardProps> = ({ id, name, onDelete }) => {
                   <Td>{data.weightAfter}</Td>
                   <Td>{data.polishGuy}</Td>
                   <Td>
-                    <Button colorScheme="red" size="sm" onClick={() => handleDeleteRow(index, setEditData)}>Delete</Button>
+                    <Button colorScheme="red" size="sm" onClick={() => handleDeleteRow(index, setEditData, 'edit')}>Delete</Button>
                   </Td>
                 </Tr>
               ))}
@@ -318,7 +356,7 @@ const JobCard: React.FC<JobCardProps> = ({ id, name, onDelete }) => {
                   <Td>{data.brokenDiamondNumber}</Td>
                   <Td>{data.brokenDiamondCt}</Td>
                   <Td>
-                    <Button colorScheme="red" size="sm" onClick={() => handleDeleteRow(index, setDiamondData)}>Delete</Button>
+                    <Button colorScheme="red" size="sm" onClick={() => handleDeleteRow(index, setDiamondData, 'diamond')}>Delete</Button>
                   </Td>
                 </Tr>
               ))}
@@ -338,7 +376,7 @@ const JobCard: React.FC<JobCardProps> = ({ id, name, onDelete }) => {
                 <Tr key={index}>
                   <Td>{data.details}</Td>
                   <Td>
-                    <Button colorScheme="red" size="sm" onClick={() => handleDeleteRow(index, setOrderedDiamondsData)}>Delete</Button>
+                    <Button colorScheme="red" size="sm" onClick={() => handleDeleteRow(index, setOrderedDiamondsData, 'diamond')}>Delete</Button>
                   </Td>
                 </Tr>
               ))}

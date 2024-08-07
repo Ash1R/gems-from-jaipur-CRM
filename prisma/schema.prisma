@@ -50,3 +50,50 @@ model Purchase {
   invoiceId  Int
   invoice    Invoice   @relation(fields: [invoiceId], references: [id])
 }
+
+model Job {
+  id    String   @id @default(uuid())
+  name  String
+  castings Casting[]
+  edits Edit[]
+  diamonds Diamond[]
+}
+
+model Casting {
+  id          String @id @default(uuid())
+  date        String
+  caster      String
+  goldSilver  String
+  castingWeight String
+  pureWeight  String
+  jobId       String
+  job         Job    @relation(fields: [jobId], references: [id])
+}
+
+model Edit {
+  id           String @id @default(uuid())
+  stepType     String
+  weightBefore String
+  weightAfter  String
+  polishGuy    String
+  jobId        String
+  job          Job    @relation(fields: [jobId], references: [id])
+}
+
+model Diamond {
+  id                    String @id @default(uuid())
+  setterName            String
+  beforeWeight          String
+  afterWeight           String
+  diamondWeight         String
+  diamondQuality        String
+  settingDustWeight     String
+  totalLoss             String
+  totalNumberDiamondSet String
+  totalCt               String
+  returnCt              String
+  brokenDiamondNumber   String
+  brokenDiamondCt       String
+  jobId                 String
+  job                   Job    @relation(fields: [jobId], references: [id])
+}

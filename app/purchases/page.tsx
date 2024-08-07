@@ -63,6 +63,7 @@ const PurchasesPage = () => {
     };
 
     try {
+      console.log(newPurchase)
       const response = await fetch('/api/purchases', {
         method: 'POST',
         headers: {

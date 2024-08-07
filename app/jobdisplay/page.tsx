@@ -1,10 +1,11 @@
-// pages/index.tsx
 'use client';
-import { useState } from 'react';
+
+import { useEffect, useState } from 'react';
 import { Box, VStack, HStack, Text, Heading, Divider } from '@chakra-ui/react';
 import ReactSelect, { Option } from '../components/ReactSelect';
 import JobCard from '../components/JobCard';
 import NewJobForm from '../components/NewJobForm';
+import axios from 'axios';
 
 const initialOptions: Option[] = [
   { value: "Gold", label: "Gold" },
@@ -14,13 +15,30 @@ const initialOptions: Option[] = [
 ];
 
 const IndexPage = () => {
-  const [jobs, setJobs] = useState<{ id: string; name: string }[]>([]);
+  const [jobs, setJobs] = useState<{ id: string; name: string, castings: any[], edits: any[], diamonds: any[] }[]>([]);
   const [selectedId, setSelectedId] = useState<Option | null>(null);
   const [selectedName, setSelectedName] = useState<Option | null>(null);
   const [options, setOptions] = useState(initialOptions);
 
+  useEffect(() => {
+    axios.get('/api/jobs')
+      .then(response => {
+        setJobs(response.data);
+      });
+  }, []);
+
   const handleAddJob = (id: string, name: string) => {
-    setJobs([...jobs, { id, name }]);
+    axios.post('/api/jobs', { id, name, castings: [], edits: [], diamonds: [] })
+      .then(response => {
+        setJobs([...jobs, response.data]);
+      });
+  };
+
+  const handleDeleteJob = (id: string) => {
+    axios.delete('/api/jobs', { data: { id } })
+      .then(() => {
+        setJobs(jobs.filter(job => job.id !== id));
+      });
   };
 
   return (
@@ -66,7 +84,15 @@ const IndexPage = () => {
             Jobs
           </Heading>
           {jobs.map((job, index) => (
-            <JobCard key={index} id={job.id} name={job.name} onDelete={() => {}} />
+            <JobCard
+              key={index}
+              id={job.id}
+              name={job.name}
+              castings={job.castings}
+              edits={job.edits}
+              diamonds={job.diamonds}
+              onDelete={() => handleDeleteJob(job.id)}
+            />
           ))}
         </VStack>
       </HStack>

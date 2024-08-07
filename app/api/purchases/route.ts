@@ -2,21 +2,22 @@ import { NextRequest, NextResponse } from 'next/server';
 import prisma from '../../lib/prisma';
 
 export async function POST(request: NextRequest) {
-  try {
+  //try {
     const body = await request.json();
     const { date, vendor, grams, weight, pricePerCt, amount, invoiceId } = body;
     //if (!date || !vendor || !grams || !weight || !pricePerCt || !amount || !invoiceId) {
     //  return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     //}
+    console.log(body);
 
     const newPurchase = await prisma.purchase.create({
       data: { date, vendor, grams, weight, pricePerCt, amount, invoiceId },
     });
     return NextResponse.json(newPurchase);
-  } catch (error) {
-    console.log(error);
-    return NextResponse.json({ error: 'Failed to add purchase' }, { status: 500 });
-  }
+ // } catch (error) {
+    //console.error('Error adding purchase:', error);
+    //return NextResponse.json({ error: 'Failed to add purchase' }, { status: 500 });
+  //}
 }
 
 export async function DELETE(request: NextRequest) {
