@@ -1,4 +1,3 @@
-// app/purchases/page.tsx
 'use client';
 import React, { useState, useEffect } from 'react';
 import {
@@ -41,7 +40,6 @@ const PurchasesPage = () => {
   });
 
   useEffect(() => {
-    // Fetch existing invoices from the backend
     const fetchInvoices = async () => {
       const response = await fetch('/api/invoices');
       const data = await response.json();
@@ -53,17 +51,15 @@ const PurchasesPage = () => {
 
   const handleAddPurchase = async () => {
     const newPurchase = {
-      date: '',
-      id: '',
+      date: new Date(),
       vendor: '',
-      grams: '',
-      weight: '',
-      pricePerCt: '',
-      amount: ''
+      grams: 0,
+      weight: 0,
+      pricePerCt: 0,
+      amount: 0
     };
 
     try {
-      console.log(newPurchase)
       const response = await fetch('/api/purchases', {
         method: 'POST',
         headers: {
@@ -135,7 +131,7 @@ const PurchasesPage = () => {
     if (!newInvoices[invoiceIndex].purchases) {
       newInvoices[invoiceIndex].purchases = [];
     }
-    newInvoices[invoiceIndex].purchases.push({ date: '', id: '', vendor: '', grams: '', weight: '', pricePerCt: '', amount: '' });
+    newInvoices[invoiceIndex].purchases.push({ date: '', vendor: '', grams: 0, weight: 0, pricePerCt: 0, amount: 0 });
     setInvoices(newInvoices);
   };
 
@@ -155,7 +151,6 @@ const PurchasesPage = () => {
         <Thead>
           <Tr>
             <Th>Date</Th>
-            <Th>ID</Th>
             <Th>Vendor</Th>
             <Th>Grams</Th>
             <Th>Weight</Th>
@@ -170,11 +165,6 @@ const PurchasesPage = () => {
               <Td><Input value={purchase.date} onChange={(e) => {
                 const newPurchases = [...purchases];
                 newPurchases[index].date = e.target.value;
-                setPurchases(newPurchases);
-              }} /></Td>
-              <Td><Input value={purchase.id} onChange={(e) => {
-                const newPurchases = [...purchases];
-                newPurchases[index].id = e.target.value;
                 setPurchases(newPurchases);
               }} /></Td>
               <Td><Input value={purchase.vendor} onChange={(e) => {
@@ -215,7 +205,7 @@ const PurchasesPage = () => {
         </Tbody>
       </Table>
       <Divider my={4} />
-      <Text fontSize="lg" fontWeight="bold" mb={4}>Mumbai Diamond</Text>
+      <Text fontSize="lg" fontWeight="bold" mb={4}>Invoices</Text>
       <Button onClick={onOpen} mb={4} colorScheme="purple">
         Add Invoice
       </Button>
@@ -229,7 +219,6 @@ const PurchasesPage = () => {
             <Thead>
               <Tr>
                 <Th>Date</Th>
-                <Th>ID</Th>
                 <Th>Vendor</Th>
                 <Th>Grams</Th>
                 <Th>Weight</Th>
@@ -244,11 +233,6 @@ const PurchasesPage = () => {
                   <Td><Input value={purchase.date} onChange={(e) => {
                     const newInvoices = [...invoices];
                     newInvoices[invoiceIndex].purchases[purchaseIndex].date = e.target.value;
-                    setInvoices(newInvoices);
-                  }} /></Td>
-                  <Td><Input value={purchase.id} onChange={(e) => {
-                    const newInvoices = [...invoices];
-                    newInvoices[invoiceIndex].purchases[purchaseIndex].id = e.target.value;
                     setInvoices(newInvoices);
                   }} /></Td>
                   <Td><Input value={purchase.vendor} onChange={(e) => {

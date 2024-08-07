@@ -1,40 +1,35 @@
-import { NextRequest, NextResponse } from 'next/server';
-import prisma from '../../lib/prisma';
+import { NextApiRequest, NextApiResponse } from 'next';
+import { PrismaClient } from '@prisma/client';
 
-export async function GET(request: NextRequest) {
-  try {
-    const invoices = await prisma.invoice.findMany({
-      include: { purchases: true },
-    });
-    return NextResponse.json(invoices);
-  } catch (error) {
-    return NextResponse.json({ error: 'Failed to fetch invoices' }, { status: 500 });
-  }
-}
+const prisma = new PrismaClient();
 
-export async function POST(request: NextRequest) {
-  try {
-    const body = await request.json();
-    const { invoiceNumber, vendorName } = body;
-    const newInvoice = await prisma.invoice.create({
-      data: { invoiceNumber, vendorName },
-    });
-    return NextResponse.json(newInvoice);
-  } catch (error) {
-    return NextResponse.json({ error: 'Failed to add invoice' }, { status: 500 });
+export default async (req: NextApiRequest, res: NextApiResponse) => {
+  if (req.method === 'POST') {
+    const data = req.body;
+    try {
+      const invoice = await prisma.invoice.create({
+        data: {
+          invoiceNumber: data.invoiceNumber,
+          vendorName: data.vendorName,
+          purchases: {
+            create: data.purchases,
+          },
+        },
+      });
+      res.status(200).json(invoice);
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to add invoice' });
+    }
+  } else if (req.method === 'GET') {
+    try {
+      const invoices = await prisma.invoice.findMany({
+        include: { purchases: true },
+      });
+      res.status(200).json(invoices);
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to fetch invoices' });
+    }
+  } else {
+    res.status(405).end(); // Method Not Allowed
   }
-}
-
-export async function PUT(request: NextRequest) {
-  try {
-    const body = await request.json();
-    const { id, purchases } = body;
-    const updatedInvoice = await prisma.invoice.update({
-      where: { id },
-      data: { purchases: { create: purchases } },
-    });
-    return NextResponse.json(updatedInvoice);
-  } catch (error) {
-    return NextResponse.json({ error: 'Failed to update invoice' }, { status: 500 });
-  }
-}
+};

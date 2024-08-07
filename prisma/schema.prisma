@@ -32,23 +32,23 @@ model MetalPurchase {
   paid      String
 }
 
-model Invoice {
-  id            Int        @id @default(autoincrement())
-  invoiceNumber String
-  vendorName    String
-  purchases     Purchase[]
-}
-
 model Purchase {
   id         Int      @id @default(autoincrement())
-  date       String
+  date       DateTime
   vendor     String
-  grams      String
-  weight     String
-  pricePerCt String
-  amount     String
-  invoiceId  Int
-  invoice    Invoice   @relation(fields: [invoiceId], references: [id])
+  grams      Float
+  weight     Float
+  pricePerCt Float
+  amount     Float
+  invoiceId  Int?
+  invoice    Invoice? @relation(fields: [invoiceId], references: [id])
+}
+
+model Invoice {
+  id           Int        @id @default(autoincrement())
+  invoiceNumber String
+  vendorName   String
+  purchases    Purchase[]
 }
 
 model Job {

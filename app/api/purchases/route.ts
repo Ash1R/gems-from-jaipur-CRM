@@ -1,34 +1,26 @@
-import { NextRequest, NextResponse } from 'next/server';
-import prisma from '../../lib/prisma';
+import { NextApiRequest, NextApiResponse } from 'next';
+import { PrismaClient } from '@prisma/client';
 
-export async function POST(request: NextRequest) {
-  //try {
-    const body = await request.json();
-    const { date, vendor, grams, weight, pricePerCt, amount, invoiceId } = body;
-    //if (!date || !vendor || !grams || !weight || !pricePerCt || !amount || !invoiceId) {
-    //  return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
-    //}
-    console.log(body);
+const prisma = new PrismaClient();
 
-    const newPurchase = await prisma.purchase.create({
-      data: { date, vendor, grams, weight, pricePerCt, amount, invoiceId },
-    });
-    return NextResponse.json(newPurchase);
- // } catch (error) {
-    //console.error('Error adding purchase:', error);
-    //return NextResponse.json({ error: 'Failed to add purchase' }, { status: 500 });
-  //}
-}
-
-export async function DELETE(request: NextRequest) {
-  try {
-    const { searchParams } = new URL(request.url);
-    const id = searchParams.get('id');
-    await prisma.purchase.delete({
-      where: { id: Number(id) },
-    });
-    return new NextResponse(null, { status: 204 });
-  } catch (error) {
-    return NextResponse.json({ error: 'Failed to delete purchase' }, { status: 500 });
+export default async (req: NextApiRequest, res: NextApiResponse) => {
+  if (req.method === 'POST') {
+    const data = req.body;
+    try {
+      const purchase = await prisma.purchase.create({ data });
+      res.status(200).json(purchase);
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to add purchase' });
+    }
+  } else if (req.method === 'DELETE') {
+    const { id } = req.query;
+    try {
+      await prisma.purchase.delete({ where: { id: Number(id) } });
+      res.status(200).json({ message: 'Purchase deleted' });
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to delete purchase' });
+    }
+  } else {
+    res.status(405).end(); // Method Not Allowed
   }
-}
+};
