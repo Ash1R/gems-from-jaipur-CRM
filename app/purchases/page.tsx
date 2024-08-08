@@ -1,5 +1,5 @@
-'use client';
-import React, { useState, useEffect } from 'react';
+"use client";
+import React, { useState, useEffect } from "react";
 import {
   Box,
   Button,
@@ -23,9 +23,9 @@ import {
   Text,
   IconButton,
   useDisclosure,
-} from '@chakra-ui/react';
-import { useForm, Controller } from 'react-hook-form';
-import { DeleteIcon } from '@chakra-ui/icons';
+} from "@chakra-ui/react";
+import { useForm, Controller } from "react-hook-form";
+import { DeleteIcon } from "@chakra-ui/icons";
 
 const PurchasesPage = () => {
   const [purchases, setPurchases] = useState<any[]>([]);
@@ -34,14 +34,14 @@ const PurchasesPage = () => {
 
   const { control, handleSubmit, reset } = useForm({
     defaultValues: {
-      invoiceNumber: '',
-      vendorName: '',
+      invoiceNumber: "",
+      vendorName: "",
     },
   });
 
   useEffect(() => {
     const fetchInvoices = async () => {
-      const response = await fetch('/api/invoices');
+      const response = await fetch("/api/invoices");
       const data = await response.json();
       setInvoices(data);
     };
@@ -52,30 +52,30 @@ const PurchasesPage = () => {
   const handleAddPurchase = async () => {
     const newPurchase = {
       date: new Date(),
-      vendor: '',
+      vendor: "",
       grams: 0,
       weight: 0,
       pricePerCt: 0,
-      amount: 0
+      amount: 0,
     };
 
     try {
-      const response = await fetch('/api/purchases', {
-        method: 'POST',
+      const response = await fetch("/api/purchases", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify(newPurchase),
       });
 
       if (!response.ok) {
-        throw new Error('Failed to add purchase');
+        throw new Error("Failed to add purchase");
       }
 
       const savedPurchase = await response.json();
       setPurchases([...purchases, savedPurchase]);
     } catch (error) {
-      console.error('Error adding purchase:', error);
+      console.error("Error adding purchase:", error);
     }
   };
 
@@ -84,16 +84,16 @@ const PurchasesPage = () => {
 
     try {
       const response = await fetch(`/api/purchases?id=${purchaseToDelete.id}`, {
-        method: 'DELETE',
+        method: "DELETE",
       });
 
       if (!response.ok) {
-        throw new Error('Failed to delete purchase');
+        throw new Error("Failed to delete purchase");
       }
 
       setPurchases(purchases.filter((_, i) => i !== index));
     } catch (error) {
-      console.error('Error deleting purchase:', error);
+      console.error("Error deleting purchase:", error);
     }
   };
 
@@ -105,16 +105,16 @@ const PurchasesPage = () => {
     };
 
     try {
-      const response = await fetch('/api/invoices', {
-        method: 'POST',
+      const response = await fetch("/api/invoices", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify(newInvoice),
       });
 
       if (!response.ok) {
-        throw new Error('Failed to add invoice');
+        throw new Error("Failed to add invoice");
       }
 
       const savedInvoice = await response.json();
@@ -122,7 +122,7 @@ const PurchasesPage = () => {
       reset();
       onClose();
     } catch (error) {
-      console.error('Error adding invoice:', error);
+      console.error("Error adding invoice:", error);
     }
   };
 
@@ -131,19 +131,35 @@ const PurchasesPage = () => {
     if (!newInvoices[invoiceIndex].purchases) {
       newInvoices[invoiceIndex].purchases = [];
     }
-    newInvoices[invoiceIndex].purchases.push({ date: '', vendor: '', grams: 0, weight: 0, pricePerCt: 0, amount: 0 });
+    newInvoices[invoiceIndex].purchases.push({
+      date: "",
+      vendor: "",
+      grams: 0,
+      weight: 0,
+      pricePerCt: 0,
+      amount: 0,
+    });
     setInvoices(newInvoices);
   };
 
-  const handleDeleteInvoicePurchase = (invoiceIndex: number, purchaseIndex: number) => {
+  const handleDeleteInvoicePurchase = (
+    invoiceIndex: number,
+    purchaseIndex: number
+  ) => {
     const newInvoices = [...invoices];
-    newInvoices[invoiceIndex].purchases = newInvoices[invoiceIndex].purchases.filter((_, i) => i !== purchaseIndex);
+    newInvoices[invoiceIndex].purchases = newInvoices[
+      invoiceIndex
+    ].purchases.filter((_, i) => i !== purchaseIndex);
     setInvoices(newInvoices);
   };
 
   return (
     <Box p={4}>
-      <Text fontSize="2xl" fontWeight="bold" mb={4}>Diamond Purchases</Text>
+      <a href="/api/auth/login">Login</a>
+      <a href="/api/auth/logout">Logout</a>
+      <Text fontSize="2xl" fontWeight="bold" mb={4}>
+        Diamond Purchases
+      </Text>
       <Button onClick={handleAddPurchase} mb={4} colorScheme="purple">
         Add Purchase
       </Button>
@@ -162,36 +178,66 @@ const PurchasesPage = () => {
         <Tbody>
           {purchases.map((purchase, index) => (
             <Tr key={index}>
-              <Td><Input value={purchase.date} onChange={(e) => {
-                const newPurchases = [...purchases];
-                newPurchases[index].date = e.target.value;
-                setPurchases(newPurchases);
-              }} /></Td>
-              <Td><Input value={purchase.vendor} onChange={(e) => {
-                const newPurchases = [...purchases];
-                newPurchases[index].vendor = e.target.value;
-                setPurchases(newPurchases);
-              }} /></Td>
-              <Td><Input value={purchase.grams} onChange={(e) => {
-                const newPurchases = [...purchases];
-                newPurchases[index].grams = e.target.value;
-                setPurchases(newPurchases);
-              }} /></Td>
-              <Td><Input value={purchase.weight} onChange={(e) => {
-                const newPurchases = [...purchases];
-                newPurchases[index].weight = e.target.value;
-                setPurchases(newPurchases);
-              }} /></Td>
-              <Td><Input value={purchase.pricePerCt} onChange={(e) => {
-                const newPurchases = [...purchases];
-                newPurchases[index].pricePerCt = e.target.value;
-                setPurchases(newPurchases);
-              }} /></Td>
-              <Td><Input value={purchase.amount} onChange={(e) => {
-                const newPurchases = [...purchases];
-                newPurchases[index].amount = e.target.value;
-                setPurchases(newPurchases);
-              }} /></Td>
+              <Td>
+                <Input
+                  value={purchase.date}
+                  onChange={(e) => {
+                    const newPurchases = [...purchases];
+                    newPurchases[index].date = e.target.value;
+                    setPurchases(newPurchases);
+                  }}
+                />
+              </Td>
+              <Td>
+                <Input
+                  value={purchase.vendor}
+                  onChange={(e) => {
+                    const newPurchases = [...purchases];
+                    newPurchases[index].vendor = e.target.value;
+                    setPurchases(newPurchases);
+                  }}
+                />
+              </Td>
+              <Td>
+                <Input
+                  value={purchase.grams}
+                  onChange={(e) => {
+                    const newPurchases = [...purchases];
+                    newPurchases[index].grams = e.target.value;
+                    setPurchases(newPurchases);
+                  }}
+                />
+              </Td>
+              <Td>
+                <Input
+                  value={purchase.weight}
+                  onChange={(e) => {
+                    const newPurchases = [...purchases];
+                    newPurchases[index].weight = e.target.value;
+                    setPurchases(newPurchases);
+                  }}
+                />
+              </Td>
+              <Td>
+                <Input
+                  value={purchase.pricePerCt}
+                  onChange={(e) => {
+                    const newPurchases = [...purchases];
+                    newPurchases[index].pricePerCt = e.target.value;
+                    setPurchases(newPurchases);
+                  }}
+                />
+              </Td>
+              <Td>
+                <Input
+                  value={purchase.amount}
+                  onChange={(e) => {
+                    const newPurchases = [...purchases];
+                    newPurchases[index].amount = e.target.value;
+                    setPurchases(newPurchases);
+                  }}
+                />
+              </Td>
               <Td>
                 <IconButton
                   aria-label="Delete"
@@ -205,14 +251,27 @@ const PurchasesPage = () => {
         </Tbody>
       </Table>
       <Divider my={4} />
-      <Text fontSize="lg" fontWeight="bold" mb={4}>Invoices</Text>
+      <Text fontSize="lg" fontWeight="bold" mb={4}>
+        Invoices
+      </Text>
       <Button onClick={onOpen} mb={4} colorScheme="purple">
         Add Invoice
       </Button>
       {invoices.map((invoice, invoiceIndex) => (
-        <Box key={invoiceIndex} border="1px solid black" borderRadius="md" p={4} bg="purple.100" mb={4}>
+        <Box
+          key={invoiceIndex}
+          border="1px solid black"
+          borderRadius="md"
+          p={4}
+          bg="purple.100"
+          mb={4}
+        >
           <Text mb={2}>Invoice {invoice.invoiceNumber}</Text>
-          <Button onClick={() => handleAddInvoicePurchase(invoiceIndex)} mb={2} colorScheme="purple">
+          <Button
+            onClick={() => handleAddInvoicePurchase(invoiceIndex)}
+            mb={2}
+            colorScheme="purple"
+          >
             Add Purchase
           </Button>
           <Table size="sm" variant="simple">
@@ -228,48 +287,96 @@ const PurchasesPage = () => {
               </Tr>
             </Thead>
             <Tbody>
-              {invoice.purchases && invoice.purchases.map((purchase, purchaseIndex) => (
-                <Tr key={purchaseIndex}>
-                  <Td><Input value={purchase.date} onChange={(e) => {
-                    const newInvoices = [...invoices];
-                    newInvoices[invoiceIndex].purchases[purchaseIndex].date = e.target.value;
-                    setInvoices(newInvoices);
-                  }} /></Td>
-                  <Td><Input value={purchase.vendor} onChange={(e) => {
-                    const newInvoices = [...invoices];
-                    newInvoices[invoiceIndex].purchases[purchaseIndex].vendor = e.target.value;
-                    setInvoices(newInvoices);
-                  }} /></Td>
-                  <Td><Input value={purchase.grams} onChange={(e) => {
-                    const newInvoices = [...invoices];
-                    newInvoices[invoiceIndex].purchases[purchaseIndex].grams = e.target.value;
-                    setInvoices(newInvoices);
-                  }} /></Td>
-                  <Td><Input value={purchase.weight} onChange={(e) => {
-                    const newInvoices = [...invoices];
-                    newInvoices[invoiceIndex].purchases[purchaseIndex].weight = e.target.value;
-                    setInvoices(newInvoices);
-                  }} /></Td>
-                  <Td><Input value={purchase.pricePerCt} onChange={(e) => {
-                    const newInvoices = [...invoices];
-                    newInvoices[invoiceIndex].purchases[purchaseIndex].pricePerCt = e.target.value;
-                    setInvoices(newInvoices);
-                  }} /></Td>
-                  <Td><Input value={purchase.amount} onChange={(e) => {
-                    const newInvoices = [...invoices];
-                    newInvoices[invoiceIndex].purchases[purchaseIndex].amount = e.target.value;
-                    setInvoices(newInvoices);
-                  }} /></Td>
-                  <Td>
-                    <IconButton
-                      aria-label="Delete"
-                      icon={<DeleteIcon />}
-                      onClick={() => handleDeleteInvoicePurchase(invoiceIndex, purchaseIndex)}
-                      colorScheme="red"
-                    />
-                  </Td>
-                </Tr>
-              ))}
+              {invoice.purchases &&
+                invoice.purchases.map((purchase, purchaseIndex) => (
+                  <Tr key={purchaseIndex}>
+                    <Td>
+                      <Input
+                        value={purchase.date}
+                        onChange={(e) => {
+                          const newInvoices = [...invoices];
+                          newInvoices[invoiceIndex].purchases[
+                            purchaseIndex
+                          ].date = e.target.value;
+                          setInvoices(newInvoices);
+                        }}
+                      />
+                    </Td>
+                    <Td>
+                      <Input
+                        value={purchase.vendor}
+                        onChange={(e) => {
+                          const newInvoices = [...invoices];
+                          newInvoices[invoiceIndex].purchases[
+                            purchaseIndex
+                          ].vendor = e.target.value;
+                          setInvoices(newInvoices);
+                        }}
+                      />
+                    </Td>
+                    <Td>
+                      <Input
+                        value={purchase.grams}
+                        onChange={(e) => {
+                          const newInvoices = [...invoices];
+                          newInvoices[invoiceIndex].purchases[
+                            purchaseIndex
+                          ].grams = e.target.value;
+                          setInvoices(newInvoices);
+                        }}
+                      />
+                    </Td>
+                    <Td>
+                      <Input
+                        value={purchase.weight}
+                        onChange={(e) => {
+                          const newInvoices = [...invoices];
+                          newInvoices[invoiceIndex].purchases[
+                            purchaseIndex
+                          ].weight = e.target.value;
+                          setInvoices(newInvoices);
+                        }}
+                      />
+                    </Td>
+                    <Td>
+                      <Input
+                        value={purchase.pricePerCt}
+                        onChange={(e) => {
+                          const newInvoices = [...invoices];
+                          newInvoices[invoiceIndex].purchases[
+                            purchaseIndex
+                          ].pricePerCt = e.target.value;
+                          setInvoices(newInvoices);
+                        }}
+                      />
+                    </Td>
+                    <Td>
+                      <Input
+                        value={purchase.amount}
+                        onChange={(e) => {
+                          const newInvoices = [...invoices];
+                          newInvoices[invoiceIndex].purchases[
+                            purchaseIndex
+                          ].amount = e.target.value;
+                          setInvoices(newInvoices);
+                        }}
+                      />
+                    </Td>
+                    <Td>
+                      <IconButton
+                        aria-label="Delete"
+                        icon={<DeleteIcon />}
+                        onClick={() =>
+                          handleDeleteInvoicePurchase(
+                            invoiceIndex,
+                            purchaseIndex
+                          )
+                        }
+                        colorScheme="red"
+                      />
+                    </Td>
+                  </Tr>
+                ))}
             </Tbody>
           </Table>
         </Box>
@@ -287,20 +394,14 @@ const PurchasesPage = () => {
                   name="invoiceNumber"
                   control={control}
                   render={({ field }) => (
-                    <Input
-                      placeholder="Invoice Number"
-                      {...field}
-                    />
+                    <Input placeholder="Invoice Number" {...field} />
                   )}
                 />
                 <Controller
                   name="vendorName"
                   control={control}
                   render={({ field }) => (
-                    <Input
-                      placeholder="Vendor Name"
-                      {...field}
-                    />
+                    <Input placeholder="Vendor Name" {...field} />
                   )}
                 />
               </VStack>
