@@ -9,7 +9,7 @@ export default function Home() {
 
   useEffect(() => {
     router.push("/api/auth/login");
-    router.push("/metalinput");
+    router.push("/purchases");
   }, [router]);
 
   return null;

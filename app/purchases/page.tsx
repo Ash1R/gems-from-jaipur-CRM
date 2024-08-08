@@ -26,11 +26,13 @@ import {
 } from "@chakra-ui/react";
 import { useForm, Controller } from "react-hook-form";
 import { DeleteIcon } from "@chakra-ui/icons";
+import { useUser } from "@auth0/nextjs-auth0/client";
 
 const PurchasesPage = () => {
   const [purchases, setPurchases] = useState<any[]>([]);
   const [invoices, setInvoices] = useState<any[]>([]);
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const { user, error, isLoading } = useUser();
 
   const { control, handleSubmit, reset } = useForm({
     defaultValues: {
@@ -152,11 +154,20 @@ const PurchasesPage = () => {
     ].purchases.filter((_, i) => i !== purchaseIndex);
     setInvoices(newInvoices);
   };
-
+  const UserDiv = () => {
+    return (
+      user && (
+        <div>
+          <p>{user.email}</p>
+        </div>
+      )
+    );
+  };
   return (
     <Box p={4}>
-      <a href="/api/auth/login">Login</a>
+      <a href="/api/auth/login">Login</a> <br />
       <a href="/api/auth/logout">Logout</a>
+      <UserDiv />
       <Text fontSize="2xl" fontWeight="bold" mb={4}>
         Diamond Purchases
       </Text>
@@ -381,7 +392,6 @@ const PurchasesPage = () => {
           </Table>
         </Box>
       ))}
-
       <Modal isOpen={isOpen} onClose={onClose}>
         <ModalOverlay />
         <ModalContent>
