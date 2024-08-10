@@ -18,6 +18,7 @@ import ReactSelect, { Option } from "../components/ReactSelect";
 import { withPageAuthRequired } from "@auth0/nextjs-auth0/client";
 import useGfjRoles from "../components/useGfjRoles";
 import Role from "../components/RoleConstants";
+import useWriteLog from "../components/useSSLogs";
 
 interface RowData {
   id?: number;
@@ -45,7 +46,7 @@ const vendorTypes: Option[] = [
 
 export default withPageAuthRequired(function MetalInput() {
   const [rows, setRows] = useState<RowData[]>([]);
-  const role = useGfjRoles();
+  const { email, role } = useGfjRoles();
   console.log("Role is ", role);
   useEffect(() => {
     const fetchRows = async () => {
@@ -83,6 +84,7 @@ export default withPageAuthRequired(function MetalInput() {
 
     try {
       console.log("Adding new row...");
+
       const response = await fetch("/api/metal-purchases", {
         method: "POST",
         headers: {
@@ -97,6 +99,10 @@ export default withPageAuthRequired(function MetalInput() {
       if (!response.ok) throw new Error("Failed to add row");
       const savedRow: RowData = await response.json();
       console.log("New row added:", savedRow);
+      useWriteLog({
+        email,
+        message: "Metal Input Added" + JSON.stringify(savedRow),
+      });
       setRows([
         { ...savedRow, metalType: null, vendor: null }, // Adjust for Option types
         ...rows,
