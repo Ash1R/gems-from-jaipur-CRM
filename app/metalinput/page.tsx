@@ -16,6 +16,8 @@ import {
 } from "@chakra-ui/react";
 import ReactSelect, { Option } from "../components/ReactSelect";
 import { withPageAuthRequired } from "@auth0/nextjs-auth0/client";
+import useGfjRoles from "../components/useGfjRoles";
+import Role from "../components/RoleConstants";
 
 interface RowData {
   id?: number;
@@ -43,7 +45,8 @@ const vendorTypes: Option[] = [
 
 export default withPageAuthRequired(function MetalInput() {
   const [rows, setRows] = useState<RowData[]>([]);
-
+  const role = useGfjRoles();
+  console.log("Role is ", role);
   useEffect(() => {
     const fetchRows = async () => {
       try {
@@ -274,11 +277,13 @@ export default withPageAuthRequired(function MetalInput() {
                     _focus={{ boxShadow: "none", borderColor: "black" }}
                   />
                 </Td>
-                <Td>
-                  <Button colorScheme="red" onClick={() => deleteRow(index)}>
-                    Delete
-                  </Button>
-                </Td>
+                {role === Role.VWD && (
+                  <Td>
+                    <Button colorScheme="red" onClick={() => deleteRow(index)}>
+                      Delete
+                    </Button>
+                  </Td>
+                )}
               </Tr>
             ))}
           </Tbody>
