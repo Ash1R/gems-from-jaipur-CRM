@@ -10,6 +10,8 @@ export default function Home() {
   useEffect(() => {
     router.push("/api/auth/login");
     router.push("/purchases");
+    router.push("/purchases");
+    router.push("/home");
   }, [router]);
 
   return null;
