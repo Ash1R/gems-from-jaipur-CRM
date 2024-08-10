@@ -8,9 +8,6 @@ export default function Home() {
   const router = useRouter();
 
   useEffect(() => {
-    router.push("/api/auth/login");
-    router.push("/purchases");
-    router.push("/purchases");
     router.push("/home");
   }, [router]);
 
