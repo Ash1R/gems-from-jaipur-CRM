@@ -101,10 +101,6 @@ export default withPageAuthRequired(function MetalInput() {
       if (!response.ok) throw new Error("Failed to add row");
       const savedRow: RowData = await response.json();
       console.log("New row added:", savedRow);
-      useWriteLog({
-        email,
-        message: "Metal Input Added" + JSON.stringify(savedRow),
-      });
       setRows([
         { ...savedRow, metalType: null, vendor: null }, // Adjust for Option types
         ...rows,
@@ -168,6 +164,11 @@ export default withPageAuthRequired(function MetalInput() {
         const newRows = [...rows];
         newRows[index].dirty = false;
         setRows(newRows);
+        useWriteLog({
+          email,
+          message: "Metal Input Saved",
+          payload: JSON.stringify(updatedRow),
+        });
       } catch (error) {
         console.error("Update row error:", error);
       }

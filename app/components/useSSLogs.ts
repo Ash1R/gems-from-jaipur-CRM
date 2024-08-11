@@ -15,10 +15,10 @@ const doc = new GoogleSpreadsheet(
   serviceAccountAuth
 );
 
-const useWriteLog = async ({ email, message }) => {
+const useWriteLog = async ({ email, message, payload }) => {
   await doc.loadInfo();
   const sheet = doc.sheetsByIndex[0];
-  sheet.addRow({ email, message });
+  sheet.addRow({ email, message, payload });
 };
 
 export default useWriteLog;
