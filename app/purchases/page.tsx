@@ -26,9 +26,9 @@ import {
 } from "@chakra-ui/react";
 import { useForm, Controller } from "react-hook-form";
 import { DeleteIcon } from "@chakra-ui/icons";
-import { useUser } from "@auth0/nextjs-auth0/client";
+import { useUser, withPageAuthRequired } from "@auth0/nextjs-auth0/client";
 
-const PurchasesPage = () => {
+export default withPageAuthRequired(function PurchasesPage() {
   const [purchases, setPurchases] = useState<any[]>([]);
   const [invoices, setInvoices] = useState<any[]>([]);
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -429,6 +429,4 @@ const PurchasesPage = () => {
       </Modal>
     </Box>
   );
-};
-
-export default PurchasesPage;
+});

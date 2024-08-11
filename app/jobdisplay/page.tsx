@@ -1,50 +1,58 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { Box, VStack, HStack, Text, Heading, Divider } from '@chakra-ui/react';
-import ReactSelect, { Option } from '../components/ReactSelect';
-import JobCard from '../components/JobCard';
-import NewJobForm from '../components/NewJobForm';
-import axios from 'axios';
+import { useEffect, useState } from "react";
+import { Box, VStack, HStack, Text, Heading, Divider } from "@chakra-ui/react";
+import { withPageAuthRequired } from "@auth0/nextjs-auth0/client";
+import ReactSelect, { Option } from "../components/ReactSelect";
+import JobCard from "../components/JobCard";
+import NewJobForm from "../components/NewJobForm";
+import axios from "axios";
 
 const initialOptions: Option[] = [
   { value: "Gold", label: "Gold" },
   { value: "Silver", label: "Silver" },
   { value: "Platinum", label: "Platinum" },
-  { value: "Palladium", label: "Palladium" }
+  { value: "Palladium", label: "Palladium" },
 ];
 
-const IndexPage = () => {
-  const [jobs, setJobs] = useState<{ id: string; name: string, castings: any[], edits: any[], diamonds: any[] }[]>([]);
+export default withPageAuthRequired(function IndexPage() {
+  const [jobs, setJobs] = useState<
+    {
+      id: string;
+      name: string;
+      castings: any[];
+      edits: any[];
+      diamonds: any[];
+    }[]
+  >([]);
   const [selectedId, setSelectedId] = useState<Option | null>(null);
   const [selectedName, setSelectedName] = useState<Option | null>(null);
   const [options, setOptions] = useState(initialOptions);
 
   useEffect(() => {
-    axios.get('/api/jobs')
-      .then(response => {
-        setJobs(response.data);
-      });
+    axios.get("/api/jobs").then((response) => {
+      setJobs(response.data);
+    });
   }, []);
 
   const handleAddJob = (id: string, name: string) => {
-    axios.post('/api/jobs', { id, name, castings: [], edits: [], diamonds: [] })
-      .then(response => {
+    axios
+      .post("/api/jobs", { id, name, castings: [], edits: [], diamonds: [] })
+      .then((response) => {
         setJobs([...jobs, response.data]);
       });
   };
 
   const handleDeleteJob = (id: string) => {
-    axios.delete('/api/jobs', { data: { id } })
-      .then(() => {
-        setJobs(jobs.filter(job => job.id !== id));
-      });
+    axios.delete("/api/jobs", { data: { id } }).then(() => {
+      setJobs(jobs.filter((job) => job.id !== id));
+    });
   };
 
   return (
     <Box p={4}>
       <HStack align="start" spacing={8}>
-        <Divider orientation='vertical'/>
+        <Divider orientation="vertical" />
         {/* Left Section */}
         <VStack align="start" spacing={8} w="30%">
           {/* Search Section */}
@@ -98,6 +106,4 @@ const IndexPage = () => {
       </HStack>
     </Box>
   );
-};
-
-export default IndexPage;
+});

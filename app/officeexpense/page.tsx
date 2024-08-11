@@ -14,6 +14,7 @@ import {
   VStack,
   Heading,
 } from "@chakra-ui/react";
+import { withPageAuthRequired } from "@auth0/nextjs-auth0/client";
 import useGfjRoles from "../components/useGfjRoles";
 import Role from "../components/RoleConstants";
 
@@ -26,7 +27,7 @@ interface RowData {
   dirty: boolean;
 }
 
-const Office = () => {
+export default withPageAuthRequired(function Office() {
   const [rows, setRows] = useState<RowData[]>([]);
   const { email, role } = useGfjRoles();
   useEffect(() => {
@@ -225,6 +226,4 @@ const Office = () => {
       </VStack>
     </Box>
   );
-};
-
-export default Office;
+});

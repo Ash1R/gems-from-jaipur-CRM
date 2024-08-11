@@ -27,48 +27,44 @@ export default function HomePage() {
           Gems from Jaipur - CRM
         </Heading>
 
-        <HStack spacing={4}>
+        <HStack spacing={4} onClick={() => router.push("/jobdisplay")}>
           <IconButton
             aria-label="Job Display"
             icon={<FaBriefcase />}
             boxSize={20}
-            onClick={() => router.push("/jobdisplay")}
             variant="solid"
             color="blue"
           />
           <Text fontSize="lg">Job Display</Text>
         </HStack>
 
-        <HStack spacing={4}>
+        <HStack spacing={4} onClick={() => router.push("/metalinput")}>
           <IconButton
             aria-label="Metal Input"
             icon={<FaWarehouse />}
             boxSize={20}
-            onClick={() => router.push("/metalinput")}
             variant="solid"
             color="red"
           />
           <Text fontSize="lg">Metal Input</Text>
         </HStack>
 
-        <HStack spacing={4}>
+        <HStack spacing={4} onClick={() => router.push("/purchases")}>
           <IconButton
             aria-label="Diamond Input"
             icon={<FaGem />}
             boxSize={20}
-            onClick={() => router.push("/purchases")}
             variant="solid"
             color="green"
           />
           <Text fontSize="lg">Diamond Input</Text>
         </HStack>
 
-        <HStack spacing={4}>
+        <HStack spacing={4} onClick={() => router.push("/officeexpense")}>
           <IconButton
             aria-label="Office Expenses"
             icon={<FaBuilding />}
             boxSize={20}
-            onClick={() => router.push("/officeexpense")}
             variant="solid"
             color="darkmagenta"
           />
