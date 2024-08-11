@@ -17,7 +17,7 @@ export default async function LogoutServerComponent() {
               width="90%"
               borderRadius={5}
             >
-              <Text marginRight={10} as="b">
+              <Text marginRight={5} as="b">
                 You need to Login to proceed
               </Text>
               <Link href="/api/auth/login">
@@ -37,7 +37,7 @@ export default async function LogoutServerComponent() {
               width="90%"
               borderRadius={5}
             >
-              <Text marginRight={10} as="b">
+              <Text marginRight={5} as="b">
                 You are signed in a {user.email}
               </Text>
               <Link href="/api/auth/logout">
