@@ -29,6 +29,7 @@ interface RowData {
   amount: string;
   vendor: Option | null;
   paid: string;
+  dirty: boolean;
 }
 
 const metalTypes: Option[] = [
@@ -47,7 +48,7 @@ const vendorTypes: Option[] = [
 export default withPageAuthRequired(function MetalInput() {
   const [rows, setRows] = useState<RowData[]>([]);
   const { email, role } = useGfjRoles();
-  console.log("Role is ", role);
+
   useEffect(() => {
     const fetchRows = async () => {
       try {
@@ -80,6 +81,7 @@ export default withPageAuthRequired(function MetalInput() {
       amount: "",
       vendor: null,
       paid: "",
+      dirty: false,
     };
 
     try {
@@ -119,29 +121,8 @@ export default withPageAuthRequired(function MetalInput() {
   ) => {
     const newRows = [...rows];
     newRows[index] = { ...newRows[index], [field]: value };
+    newRows[index].dirty = true;
     setRows(newRows);
-
-    const updatedRow = newRows[index];
-    if (updatedRow.id) {
-      try {
-        console.log(`Updating row with id ${updatedRow.id}...`);
-        const response = await fetch("/api/metal-purchases", {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            ...updatedRow,
-            metalType: updatedRow.metalType?.value || "",
-            vendor: updatedRow.vendor?.value || "",
-          }),
-        });
-        if (!response.ok) throw new Error("Failed to update row");
-        console.log("Row updated:", updatedRow);
-      } catch (error) {
-        console.error("Update row error:", error);
-      }
-    }
   };
 
   const deleteRow = async (index: number) => {
@@ -164,6 +145,33 @@ export default withPageAuthRequired(function MetalInput() {
 
     const newRows = rows.filter((_, i) => i !== index);
     setRows(newRows);
+  };
+
+  const saveRow = async (index: number) => {
+    const updatedRow = rows[index];
+    if (updatedRow.id) {
+      try {
+        console.log(`Updating row with id ${updatedRow.id}...`);
+        const response = await fetch("/api/metal-purchases", {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            ...updatedRow,
+            metalType: updatedRow.metalType?.value || "",
+            vendor: updatedRow.vendor?.value || "",
+          }),
+        });
+        if (!response.ok) throw new Error("Failed to update row");
+        console.log("Row updated:", updatedRow);
+        const newRows = [...rows];
+        newRows[index].dirty = false;
+        setRows(newRows);
+      } catch (error) {
+        console.error("Update row error:", error);
+      }
+    }
   };
 
   function getFormattedDate(): string {
@@ -283,6 +291,13 @@ export default withPageAuthRequired(function MetalInput() {
                     _focus={{ boxShadow: "none", borderColor: "black" }}
                   />
                 </Td>
+                {row.dirty && (
+                  <Td>
+                    <Button colorScheme="blue" onClick={() => saveRow(index)}>
+                      Save
+                    </Button>
+                  </Td>
+                )}
                 {role === Role.VWD && (
                   <Td>
                     <Button colorScheme="red" onClick={() => deleteRow(index)}>
