@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo } from "react";
 import {
   Box,
   Button,
@@ -13,7 +13,9 @@ import {
   Input,
   VStack,
   Heading,
-} from '@chakra-ui/react';
+} from "@chakra-ui/react";
+import useGfjRoles from "../components/useGfjRoles";
+import Role from "../components/RoleConstants";
 
 interface RowData {
   id?: number;
@@ -21,14 +23,15 @@ interface RowData {
   description: string;
   withdraw: string;
   received: string;
+  dirty: boolean;
 }
 
 const Office = () => {
   const [rows, setRows] = useState<RowData[]>([]);
-
+  const { email, role } = useGfjRoles();
   useEffect(() => {
     const fetchRows = async () => {
-      const response = await fetch('/api/expenses');
+      const response = await fetch("/api/expenses");
       const data: RowData[] = await response.json();
       setRows(data);
     };
@@ -39,15 +42,16 @@ const Office = () => {
   const addRow = async () => {
     const newRow: RowData = {
       date: getFormattedDate(),
-      description: '',
-      withdraw: '0',
-      received: '0',
+      description: "",
+      withdraw: "0",
+      received: "0",
+      dirty: false,
     };
 
-    const response = await fetch('/api/expenses', {
-      method: 'POST',
+    const response = await fetch("/api/expenses", {
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
       body: JSON.stringify(newRow),
     });
@@ -66,17 +70,23 @@ const Office = () => {
       ...newRows[index],
       [field]: value,
     };
+    newRows[index].dirty = true;
     setRows(newRows);
+  };
 
-    const updatedRow = newRows[index];
+  const saveRow = async (index: number) => {
+    const updatedRow = rows[index];
     if (updatedRow.id) {
       await fetch(`/api/expenses/${updatedRow.id}`, {
-        method: 'PUT',
+        method: "PUT",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify(updatedRow),
       });
+      const newRows = [...rows];
+      newRows[index].dirty = false;
+      setRows(newRows);
     }
   };
 
@@ -85,7 +95,7 @@ const Office = () => {
 
     if (rowToDelete.id) {
       await fetch(`/api/expenses?id=${rowToDelete.id}`, {
-        method: 'DELETE',
+        method: "DELETE",
       });
     }
 
@@ -95,8 +105,18 @@ const Office = () => {
 
   const getFormattedDate = (): string => {
     const months = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+      "Jan",
+      "Feb",
+      "Mar",
+      "Apr",
+      "May",
+      "Jun",
+      "Jul",
+      "Aug",
+      "Sep",
+      "Oct",
+      "Nov",
+      "Dec",
     ];
     const date = new Date();
     const day = date.getDate();
@@ -106,8 +126,14 @@ const Office = () => {
   };
 
   const calculateBalance = (): number => {
-    const totalReceived = rows.reduce((sum, row) => sum + (parseFloat(row.received) || 0), 0);
-    const totalWithdraw = rows.reduce((sum, row) => sum + (parseFloat(row.withdraw) || 0), 0);
+    const totalReceived = rows.reduce(
+      (sum, row) => sum + (parseFloat(row.received) || 0),
+      0
+    );
+    const totalWithdraw = rows.reduce(
+      (sum, row) => sum + (parseFloat(row.withdraw) || 0),
+      0
+    );
     return totalReceived - totalWithdraw;
   };
 
@@ -141,40 +167,57 @@ const Office = () => {
                 <Td>
                   <Input
                     value={row.date}
-                    onChange={(e) => handleInputChange(index, 'date', e.target.value)}
+                    onChange={(e) =>
+                      handleInputChange(index, "date", e.target.value)
+                    }
                     borderColor="black"
-                    _focus={{ boxShadow: 'none', borderColor: 'black' }}
+                    _focus={{ boxShadow: "none", borderColor: "black" }}
                   />
                 </Td>
                 <Td>
                   <Input
                     value={row.description}
-                    onChange={(e) => handleInputChange(index, 'description', e.target.value)}
+                    onChange={(e) =>
+                      handleInputChange(index, "description", e.target.value)
+                    }
                     borderColor="black"
-                    _focus={{ boxShadow: 'none', borderColor: 'black' }}
+                    _focus={{ boxShadow: "none", borderColor: "black" }}
                   />
                 </Td>
                 <Td>
                   <Input
                     value={row.withdraw}
-                    onChange={(e) => handleInputChange(index, 'withdraw', e.target.value)}
+                    onChange={(e) =>
+                      handleInputChange(index, "withdraw", e.target.value)
+                    }
                     borderColor="black"
-                    _focus={{ boxShadow: 'none', borderColor: 'black' }}
+                    _focus={{ boxShadow: "none", borderColor: "black" }}
                   />
                 </Td>
                 <Td>
                   <Input
                     value={row.received}
-                    onChange={(e) => handleInputChange(index, 'received', e.target.value)}
+                    onChange={(e) =>
+                      handleInputChange(index, "received", e.target.value)
+                    }
                     borderColor="black"
-                    _focus={{ boxShadow: 'none', borderColor: 'black' }}
+                    _focus={{ boxShadow: "none", borderColor: "black" }}
                   />
                 </Td>
-                <Td>
-                  <Button colorScheme="red" onClick={() => deleteRow(index)}>
-                    Delete
-                  </Button>
-                </Td>
+                {row.dirty && (
+                  <Td>
+                    <Button colorScheme="blue" onClick={() => saveRow(index)}>
+                      Save
+                    </Button>
+                  </Td>
+                )}
+                {role === Role.VWD && (
+                  <Td>
+                    <Button colorScheme="red" onClick={() => deleteRow(index)}>
+                      Delete
+                    </Button>
+                  </Td>
+                )}
               </Tr>
             ))}
           </Tbody>
