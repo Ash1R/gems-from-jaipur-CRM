@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo } from 'react';
 import {
   Box,
   Button,
@@ -13,11 +13,12 @@ import {
   Input,
   VStack,
   Heading,
-} from "@chakra-ui/react";
-import { withPageAuthRequired } from "@auth0/nextjs-auth0/client";
-import useGfjRoles from "../components/useGfjRoles";
-import Role from "../components/RoleConstants";
-import useDeleteErrorToast from "../components/useDeleteErrorToast";
+} from '@chakra-ui/react';
+import { withPageAuthRequired } from '@auth0/nextjs-auth0/client';
+import useGfjRoles from '../components/useGfjRoles';
+import Role from '../components/RoleConstants';
+import useDeleteErrorToast from '../components/useDeleteErrorToast';
+import useExpensesSpreadsheet from '../components/useExpenseBackup';
 
 interface RowData {
   id?: number;
@@ -34,7 +35,7 @@ export default withPageAuthRequired(function Office() {
   const deleteErrorToastFn = useDeleteErrorToast();
   useEffect(() => {
     const fetchRows = async () => {
-      const response = await fetch("/api/expenses");
+      const response = await fetch('/api/expenses');
       const data: RowData[] = await response.json();
       setRows(data);
     };
@@ -45,16 +46,16 @@ export default withPageAuthRequired(function Office() {
   const addRow = async () => {
     const newRow: RowData = {
       date: getFormattedDate(),
-      description: "",
-      withdraw: "0",
-      received: "0",
+      description: '',
+      withdraw: '0',
+      received: '0',
       dirty: false,
     };
 
-    const response = await fetch("/api/expenses", {
-      method: "POST",
+    const response = await fetch('/api/expenses', {
+      method: 'POST',
       headers: {
-        "Content-Type": "application/json",
+        'Content-Type': 'application/json',
       },
       body: JSON.stringify(newRow),
     });
@@ -81,15 +82,21 @@ export default withPageAuthRequired(function Office() {
     const updatedRow = rows[index];
     if (updatedRow.id) {
       await fetch(`/api/expenses/${updatedRow.id}`, {
-        method: "PUT",
+        method: 'PUT',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify(updatedRow),
       });
       const newRows = [...rows];
       newRows[index].dirty = false;
       setRows(newRows);
+      useExpensesSpreadsheet({
+        date: updatedRow.date,
+        description: updatedRow.description,
+        withdraw: updatedRow.withdraw,
+        received: updatedRow.received,
+      });
     }
   };
 
@@ -98,7 +105,7 @@ export default withPageAuthRequired(function Office() {
 
     if (rowToDelete.id) {
       await fetch(`/api/expenses?id=${rowToDelete.id}`, {
-        method: "DELETE",
+        method: 'DELETE',
       });
     }
 
@@ -108,18 +115,18 @@ export default withPageAuthRequired(function Office() {
 
   const getFormattedDate = (): string => {
     const months = [
-      "Jan",
-      "Feb",
-      "Mar",
-      "Apr",
-      "May",
-      "Jun",
-      "Jul",
-      "Aug",
-      "Sep",
-      "Oct",
-      "Nov",
-      "Dec",
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
     ];
     const date = new Date();
     const day = date.getDate();
@@ -171,40 +178,40 @@ export default withPageAuthRequired(function Office() {
                   <Input
                     value={row.date}
                     onChange={(e) =>
-                      handleInputChange(index, "date", e.target.value)
+                      handleInputChange(index, 'date', e.target.value)
                     }
                     borderColor="black"
-                    _focus={{ boxShadow: "none", borderColor: "black" }}
+                    _focus={{ boxShadow: 'none', borderColor: 'black' }}
                   />
                 </Td>
                 <Td>
                   <Input
                     value={row.description}
                     onChange={(e) =>
-                      handleInputChange(index, "description", e.target.value)
+                      handleInputChange(index, 'description', e.target.value)
                     }
                     borderColor="black"
-                    _focus={{ boxShadow: "none", borderColor: "black" }}
+                    _focus={{ boxShadow: 'none', borderColor: 'black' }}
                   />
                 </Td>
                 <Td>
                   <Input
                     value={row.withdraw}
                     onChange={(e) =>
-                      handleInputChange(index, "withdraw", e.target.value)
+                      handleInputChange(index, 'withdraw', e.target.value)
                     }
                     borderColor="black"
-                    _focus={{ boxShadow: "none", borderColor: "black" }}
+                    _focus={{ boxShadow: 'none', borderColor: 'black' }}
                   />
                 </Td>
                 <Td>
                   <Input
                     value={row.received}
                     onChange={(e) =>
-                      handleInputChange(index, "received", e.target.value)
+                      handleInputChange(index, 'received', e.target.value)
                     }
                     borderColor="black"
-                    _focus={{ boxShadow: "none", borderColor: "black" }}
+                    _focus={{ boxShadow: 'none', borderColor: 'black' }}
                   />
                 </Td>
                 {row.dirty && (
@@ -226,7 +233,7 @@ export default withPageAuthRequired(function Office() {
                     <Button
                       colorScheme="gray"
                       onClick={() =>
-                        deleteErrorToastFn({ message: "delete Expenses" })
+                        deleteErrorToastFn({ message: 'delete Expenses' })
                       }
                     >
                       Delete
