@@ -30,6 +30,7 @@ import { useUser, withPageAuthRequired } from "@auth0/nextjs-auth0/client";
 
 export default withPageAuthRequired(function PurchasesPage() {
   const [purchases, setPurchases] = useState<any[]>([]);
+  const [plainPurchases, setPlainPurchases] = useState<any[]>([]);
   const [invoices, setInvoices] = useState<any[]>([]);
   const { isOpen, onOpen, onClose } = useDisclosure();
   const { user, error, isLoading } = useUser();
@@ -48,15 +49,15 @@ export default withPageAuthRequired(function PurchasesPage() {
       setInvoices(data);
     };
     const fetchPlainPurchases = async () => {
-      const response = await fetch("/api/purchases");
+      const response = await fetch("/api/plainpurchases");
       const data = await response.json();
-      setPurchases(data);
+      setPlainPurchases(data);
     };
     fetchPlainPurchases();
     fetchInvoices();
   }, []);
 
-  const handleAddPurchase = async () => {
+  const handleAddPlainPurchase = async () => {
     const newPurchase = {
       date: new Date(),
       vendor: "",
@@ -67,7 +68,7 @@ export default withPageAuthRequired(function PurchasesPage() {
     };
 
     try {
-      const response = await fetch("/api/purchases", {
+      const response = await fetch("/api/plainpurchases", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -76,31 +77,61 @@ export default withPageAuthRequired(function PurchasesPage() {
       });
 
       if (!response.ok) {
-        throw new Error("Failed to add purchase");
+        throw new Error("Failed to add plain purchase");
       }
 
       const savedPurchase = await response.json();
-      setPurchases([...purchases, savedPurchase]);
+      setPlainPurchases([...plainPurchases, savedPurchase]);
     } catch (error) {
-      console.error("Error adding purchase:", error);
+      console.error("Error adding plain purchase:", error);
     }
   };
 
-  const handleDeletePurchase = async (index: number) => {
-    const purchaseToDelete = purchases[index];
+  const handleDeletePlainPurchase = async (index: number) => {
+    const purchaseToDelete = plainPurchases[index];
 
     try {
-      const response = await fetch(`/api/purchases?id=${purchaseToDelete.id}`, {
-        method: "DELETE",
-      });
+      const response = await fetch(
+        `/api/plainpurchases?id=${purchaseToDelete.id}`,
+        {
+          method: "DELETE",
+        }
+      );
 
       if (!response.ok) {
         throw new Error("Failed to delete purchase");
       }
 
-      setPurchases(purchases.filter((_, i) => i !== index));
+      setPlainPurchases(plainPurchases.filter((_, i) => i !== index));
     } catch (error) {
       console.error("Error deleting purchase:", error);
+    }
+  };
+
+  const handleSavePlainPurchaseRow = async (index: number) => {
+    const updatedPlainPurchase = plainPurchases[index];
+    if (updatedPlainPurchase.id) {
+      try {
+        console.log(
+          `Updating plain purchase with id ${updatedPlainPurchase.id}...`
+        );
+        const response = await fetch("/api/plainpurchases", {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            ...updatedPlainPurchase,
+          }),
+        });
+        if (!response.ok) throw new Error("Failed to update row");
+        console.log("Row updated:", updatedPlainPurchase);
+        const newRows = [...plainPurchases];
+        newRows[index].dirty = false;
+        setPlainPurchases(newRows);
+      } catch (error) {
+        console.error("Update row error:", error);
+      }
     }
   };
 
@@ -176,8 +207,8 @@ export default withPageAuthRequired(function PurchasesPage() {
       <Text fontSize="2xl" fontWeight="bold" mb={4}>
         Diamond Purchases
       </Text>
-      <Button onClick={handleAddPurchase} mb={4} colorScheme="purple">
-        Add Purchase
+      <Button onClick={handleAddPlainPurchase} mb={4} colorScheme="purple">
+        Add Plain Purchase
       </Button>
       <Table size="sm" variant="simple">
         <Thead>
@@ -192,15 +223,16 @@ export default withPageAuthRequired(function PurchasesPage() {
           </Tr>
         </Thead>
         <Tbody>
-          {purchases.map((purchase, index) => (
+          {plainPurchases.map((purchase, index) => (
             <Tr key={index}>
               <Td>
                 <Input
                   value={purchase.date}
                   onChange={(e) => {
-                    const newPurchases = [...purchases];
+                    const newPurchases = [...plainPurchases];
                     newPurchases[index].date = e.target.value;
-                    setPurchases(newPurchases);
+                    newPurchases[index].dirty = true;
+                    setPlainPurchases(newPurchases);
                   }}
                 />
               </Td>
@@ -208,9 +240,10 @@ export default withPageAuthRequired(function PurchasesPage() {
                 <Input
                   value={purchase.vendor}
                   onChange={(e) => {
-                    const newPurchases = [...purchases];
+                    const newPurchases = [...plainPurchases];
                     newPurchases[index].vendor = e.target.value;
-                    setPurchases(newPurchases);
+                    newPurchases[index].dirty = true;
+                    setPlainPurchases(newPurchases);
                   }}
                 />
               </Td>
@@ -218,9 +251,10 @@ export default withPageAuthRequired(function PurchasesPage() {
                 <Input
                   value={purchase.grams}
                   onChange={(e) => {
-                    const newPurchases = [...purchases];
+                    const newPurchases = [...plainPurchases];
                     newPurchases[index].grams = e.target.value;
-                    setPurchases(newPurchases);
+                    newPurchases[index].dirty = true;
+                    setPlainPurchases(newPurchases);
                   }}
                 />
               </Td>
@@ -228,9 +262,10 @@ export default withPageAuthRequired(function PurchasesPage() {
                 <Input
                   value={purchase.weight}
                   onChange={(e) => {
-                    const newPurchases = [...purchases];
+                    const newPurchases = [...plainPurchases];
                     newPurchases[index].weight = e.target.value;
-                    setPurchases(newPurchases);
+                    newPurchases[index].dirty = true;
+                    setPlainPurchases(newPurchases);
                   }}
                 />
               </Td>
@@ -238,9 +273,10 @@ export default withPageAuthRequired(function PurchasesPage() {
                 <Input
                   value={purchase.pricePerCt}
                   onChange={(e) => {
-                    const newPurchases = [...purchases];
+                    const newPurchases = [...plainPurchases];
                     newPurchases[index].pricePerCt = e.target.value;
-                    setPurchases(newPurchases);
+                    newPurchases[index].dirty = true;
+                    setPlainPurchases(newPurchases);
                   }}
                 />
               </Td>
@@ -248,17 +284,28 @@ export default withPageAuthRequired(function PurchasesPage() {
                 <Input
                   value={purchase.amount}
                   onChange={(e) => {
-                    const newPurchases = [...purchases];
+                    const newPurchases = [...plainPurchases];
                     newPurchases[index].amount = e.target.value;
-                    setPurchases(newPurchases);
+                    newPurchases[index].dirty = true;
+                    setPlainPurchases(newPurchases);
                   }}
                 />
               </Td>
+              {purchase.dirty && (
+                <Td>
+                  <Button
+                    colorScheme="blue"
+                    onClick={() => handleSavePlainPurchaseRow(index)}
+                  >
+                    Save
+                  </Button>
+                </Td>
+              )}
               <Td>
                 <IconButton
                   aria-label="Delete"
                   icon={<DeleteIcon />}
-                  onClick={() => handleDeletePurchase(index)}
+                  onClick={() => handleDeletePlainPurchase(index)}
                   colorScheme="red"
                 />
               </Td>
