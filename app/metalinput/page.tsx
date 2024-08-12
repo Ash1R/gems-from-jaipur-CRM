@@ -19,6 +19,7 @@ import { withPageAuthRequired } from "@auth0/nextjs-auth0/client";
 import useGfjRoles from "../components/useGfjRoles";
 import Role from "../components/RoleConstants";
 import useWriteLog from "../components/useSSLogs";
+import useDeleteErrorToast from "../components/useDeleteErrorToast";
 
 interface RowData {
   id?: number;
@@ -48,6 +49,7 @@ const vendorTypes: Option[] = [
 export default withPageAuthRequired(function MetalInput() {
   const [rows, setRows] = useState<RowData[]>([]);
   const { email, role } = useGfjRoles();
+  const deleteErrorToastFn = useDeleteErrorToast();
 
   useEffect(() => {
     const fetchRows = async () => {
@@ -302,6 +304,18 @@ export default withPageAuthRequired(function MetalInput() {
                 {role === Role.VWD && (
                   <Td>
                     <Button colorScheme="red" onClick={() => deleteRow(index)}>
+                      Delete
+                    </Button>
+                  </Td>
+                )}
+                {role != Role.VWD && (
+                  <Td>
+                    <Button
+                      colorScheme="gray"
+                      onClick={() =>
+                        deleteErrorToastFn({ message: "delete Metal Input" })
+                      }
+                    >
                       Delete
                     </Button>
                   </Td>

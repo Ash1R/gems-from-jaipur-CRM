@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import {
   Box,
   Button,
@@ -23,11 +23,13 @@ import {
   IconButton,
   Center,
   Stack,
-} from '@chakra-ui/react';
-import { useForm, Controller, UseFormReturn } from 'react-hook-form';
-import { DeleteIcon } from '@chakra-ui/icons';
-import ReactSelect, { Option } from './ReactSelect';
-import axios from 'axios';
+} from "@chakra-ui/react";
+import { useForm, Controller, UseFormReturn } from "react-hook-form";
+import { DeleteIcon } from "@chakra-ui/icons";
+import ReactSelect, { Option } from "./ReactSelect";
+import Role from "./RoleConstants";
+import axios from "axios";
+import useDeleteErrorToast from "./useDeleteErrorToast";
 
 interface JobCardProps {
   id: string;
@@ -36,22 +38,23 @@ interface JobCardProps {
   edits: any[];
   diamonds: any[];
   onDelete: () => void;
+  role: string;
 }
 
 const initialOptions: Option[] = [
-  { value: 'Option1', label: 'Option1' },
-  { value: 'Option2', label: 'Option2' },
+  { value: "Option1", label: "Option1" },
+  { value: "Option2", label: "Option2" },
 ];
 
 const editOptions: Option[] = [
-  { value: 'Polish', label: 'Polish' },
-  { value: 'Step2', label: 'Step2' },
-  { value: 'Step3', label: 'Step3' },
+  { value: "Polish", label: "Polish" },
+  { value: "Step2", label: "Step2" },
+  { value: "Step3", label: "Step3" },
 ];
 
 const diamondQualityOptions: Option[] = [
-  { value: 'Quality1', label: 'Quality1' },
-  { value: 'Quality2', label: 'Quality2' },
+  { value: "Quality1", label: "Quality1" },
+  { value: "Quality2", label: "Quality2" },
 ];
 
 interface CastingData {
@@ -91,8 +94,10 @@ const JobCard: React.FC<JobCardProps> = ({
   edits,
   diamonds,
   onDelete,
+  role,
 }) => {
   const [expanded, setExpanded] = useState(false);
+  const deleteErrorToastFn = useDeleteErrorToast();
   const {
     isOpen: isCastingOpen,
     onOpen: onCastingOpen,
@@ -116,10 +121,10 @@ const JobCard: React.FC<JobCardProps> = ({
   const { control, handleSubmit, reset } = useForm<CastingData>({
     defaultValues: {
       date: new Date().toISOString().substring(0, 10),
-      caster: '',
-      goldSilver: '',
-      castingWeight: '',
-      pureWeight: '',
+      caster: "",
+      goldSilver: "",
+      castingWeight: "",
+      pureWeight: "",
     },
   });
 
@@ -130,10 +135,10 @@ const JobCard: React.FC<JobCardProps> = ({
     reset: editReset,
   } = useForm<EditData>({
     defaultValues: {
-      stepType: '',
-      weightBefore: '',
-      weightAfter: '',
-      polishGuy: '',
+      stepType: "",
+      weightBefore: "",
+      weightAfter: "",
+      polishGuy: "",
     },
   });
 
@@ -143,22 +148,22 @@ const JobCard: React.FC<JobCardProps> = ({
     reset: diamondReset,
   } = useForm<DiamondData>({
     defaultValues: {
-      setterName: '',
-      beforeWeight: '',
-      afterWeight: '',
-      diamondWeight: '',
-      diamondQuality: '',
-      settingDustWeight: '',
-      totalLoss: '',
-      totalNumberDiamondSet: '',
-      totalCt: '',
-      returnCt: '',
-      brokenDiamondNumber: '',
-      brokenDiamondCt: '',
+      setterName: "",
+      beforeWeight: "",
+      afterWeight: "",
+      diamondWeight: "",
+      diamondQuality: "",
+      settingDustWeight: "",
+      totalLoss: "",
+      totalNumberDiamondSet: "",
+      totalCt: "",
+      returnCt: "",
+      brokenDiamondNumber: "",
+      brokenDiamondCt: "",
     },
   });
 
-  const stepType = watch('stepType');
+  const stepType = watch("stepType");
 
   const handleAddCasting = (data: CastingData) => {
     const newCasting = {
@@ -168,14 +173,14 @@ const JobCard: React.FC<JobCardProps> = ({
       castingWeight: data.castingWeight,
       pureWeight: data.pureWeight,
     };
-    console.log('Adding new casting:', newCasting); // Log the data being sent
+    console.log("Adding new casting:", newCasting); // Log the data being sent
     axios
       .post(`/api/jobs/${id}/castings`, newCasting)
       .then((response) => {
         setCastingData([...castingData, response.data]);
       })
       .catch((error) => {
-        console.error('Error adding casting:', error); // Log the error
+        console.error("Error adding casting:", error); // Log the error
       });
 
     reset();
@@ -189,14 +194,14 @@ const JobCard: React.FC<JobCardProps> = ({
       weightAfter: data.weightAfter,
       polishGuy: data.polishGuy,
     };
-    console.log('Adding new edit:', newEdit); // Log the data being sent
+    console.log("Adding new edit:", newEdit); // Log the data being sent
     axios
       .post(`/api/jobs/${id}/edits`, newEdit)
       .then((response) => {
         setEditData([...editData, response.data]);
       })
       .catch((error) => {
-        console.error('Error adding edit:', error); // Log the error
+        console.error("Error adding edit:", error); // Log the error
       });
 
     editReset();
@@ -218,14 +223,14 @@ const JobCard: React.FC<JobCardProps> = ({
       brokenDiamondNumber: data.brokenDiamondNumber,
       brokenDiamondCt: data.brokenDiamondCt,
     };
-    console.log('Adding new diamond:', newDiamond); // Log the data being sent
+    console.log("Adding new diamond:", newDiamond); // Log the data being sent
     axios
       .post(`/api/jobs/${id}/diamonds`, newDiamond)
       .then((response) => {
         setDiamondData([...diamondData, response.data]);
       })
       .catch((error) => {
-        console.error('Error adding diamond:', error); // Log the error
+        console.error("Error adding diamond:", error); // Log the error
       });
 
     diamondReset();
@@ -235,13 +240,13 @@ const JobCard: React.FC<JobCardProps> = ({
   const handleDeleteRow = (
     index: number,
     setData: React.Dispatch<React.SetStateAction<any[]>>,
-    dataType: 'casting' | 'edit' | 'diamond'
+    dataType: "casting" | "edit" | "diamond"
   ) => {
     let newData;
-    if (dataType === 'casting') {
+    if (dataType === "casting") {
       newData = castingData.filter((_, i) => i !== index);
       axios
-        .post('/api/jobs', {
+        .post("/api/jobs", {
           id,
           name,
           castings: newData,
@@ -251,10 +256,10 @@ const JobCard: React.FC<JobCardProps> = ({
         .then((response) => {
           setCastingData(response.data.castings);
         });
-    } else if (dataType === 'edit') {
+    } else if (dataType === "edit") {
       newData = editData.filter((_, i) => i !== index);
       axios
-        .post('/api/jobs', {
+        .post("/api/jobs", {
           id,
           name,
           castings: castingData,
@@ -264,10 +269,10 @@ const JobCard: React.FC<JobCardProps> = ({
         .then((response) => {
           setEditData(response.data.edits);
         });
-    } else if (dataType === 'diamond') {
+    } else if (dataType === "diamond") {
       newData = diamondData.filter((_, i) => i !== index);
       axios
-        .post('/api/jobs', {
+        .post("/api/jobs", {
           id,
           name,
           castings: castingData,
@@ -289,15 +294,28 @@ const JobCard: React.FC<JobCardProps> = ({
       w="full"
       position="relative"
     >
-      <IconButton
-        icon={<DeleteIcon />}
-        aria-label="Delete"
-        position="absolute"
-        top="4px"
-        right="4px"
-        colorScheme="red"
-        onClick={onDelete}
-      />
+      {role === Role.VWD && (
+        <IconButton
+          icon={<DeleteIcon />}
+          aria-label="Delete"
+          position="absolute"
+          top="4px"
+          right="4px"
+          colorScheme="red"
+          onClick={onDelete}
+        />
+      )}
+      {role != Role.VWD && (
+        <IconButton
+          icon={<DeleteIcon />}
+          aria-label="Delete"
+          position="absolute"
+          top="4px"
+          right="4px"
+          colorScheme="gray"
+          onClick={() => deleteErrorToastFn({ message: "can delete jobs" })}
+        />
+      )}
       <Center flexDirection="column" textAlign="center" mb={4}>
         <Stack direction="column" spacing={2} align="center">
           <Text fontWeight="bold" fontSize="lg">
@@ -316,7 +334,7 @@ const JobCard: React.FC<JobCardProps> = ({
       </Center>
       <HStack spacing={4} justify="center">
         <Button colorScheme="pink" onClick={() => setExpanded(!expanded)}>
-          {expanded ? 'Collapse' : 'Full Card'}
+          {expanded ? "Collapse" : "Full Card"}
         </Button>
         <Button colorScheme="blue" onClick={onCastingOpen}>
           Add Casting
@@ -357,7 +375,7 @@ const JobCard: React.FC<JobCardProps> = ({
                       colorScheme="red"
                       size="sm"
                       onClick={() =>
-                        handleDeleteRow(index, setCastingData, 'casting')
+                        handleDeleteRow(index, setCastingData, "casting")
                       }
                     >
                       Delete
@@ -393,7 +411,7 @@ const JobCard: React.FC<JobCardProps> = ({
                       colorScheme="red"
                       size="sm"
                       onClick={() =>
-                        handleDeleteRow(index, setEditData, 'edit')
+                        handleDeleteRow(index, setEditData, "edit")
                       }
                     >
                       Delete
@@ -445,7 +463,7 @@ const JobCard: React.FC<JobCardProps> = ({
                       colorScheme="red"
                       size="sm"
                       onClick={() =>
-                        handleDeleteRow(index, setDiamondData, 'diamond')
+                        handleDeleteRow(index, setDiamondData, "diamond")
                       }
                     >
                       Delete
@@ -478,7 +496,7 @@ const JobCard: React.FC<JobCardProps> = ({
                         handleDeleteRow(
                           index,
                           setOrderedDiamondsData,
-                          'diamond'
+                          "diamond"
                         )
                       }
                     >
@@ -518,7 +536,7 @@ const JobCard: React.FC<JobCardProps> = ({
                           (option) => option.value === field.value
                         ) || null
                       }
-                      onChange={(value) => field.onChange(value?.value || '')}
+                      onChange={(value) => field.onChange(value?.value || "")}
                       placeholder="Select Caster"
                     />
                   )}
@@ -534,7 +552,7 @@ const JobCard: React.FC<JobCardProps> = ({
                           (option) => option.value === field.value
                         ) || null
                       }
-                      onChange={(value) => field.onChange(value?.value || '')}
+                      onChange={(value) => field.onChange(value?.value || "")}
                       placeholder="Gold Ct./Silver"
                     />
                   )}
@@ -586,7 +604,7 @@ const JobCard: React.FC<JobCardProps> = ({
                           (option) => option.value === field.value
                         ) || null
                       }
-                      onChange={(value) => field.onChange(value?.value || '')}
+                      onChange={(value) => field.onChange(value?.value || "")}
                       placeholder="Type of Step"
                     />
                   )}
@@ -605,7 +623,7 @@ const JobCard: React.FC<JobCardProps> = ({
                     <Input placeholder="Weight After" {...field} />
                   )}
                 />
-                {stepType === 'Polish' && (
+                {stepType === "Polish" && (
                   <Controller
                     name="polishGuy"
                     control={editControl}
@@ -675,7 +693,7 @@ const JobCard: React.FC<JobCardProps> = ({
                           (option) => option.value === field.value
                         ) || null
                       }
-                      onChange={(value) => field.onChange(value?.value || '')}
+                      onChange={(value) => field.onChange(value?.value || "")}
                       placeholder="Diamond Quality"
                     />
                   )}
