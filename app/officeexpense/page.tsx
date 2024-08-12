@@ -17,6 +17,7 @@ import {
 import { withPageAuthRequired } from "@auth0/nextjs-auth0/client";
 import useGfjRoles from "../components/useGfjRoles";
 import Role from "../components/RoleConstants";
+import useDeleteErrorToast from "../components/useDeleteErrorToast";
 
 interface RowData {
   id?: number;
@@ -30,6 +31,7 @@ interface RowData {
 export default withPageAuthRequired(function Office() {
   const [rows, setRows] = useState<RowData[]>([]);
   const { email, role } = useGfjRoles();
+  const deleteErrorToastFn = useDeleteErrorToast();
   useEffect(() => {
     const fetchRows = async () => {
       const response = await fetch("/api/expenses");
@@ -215,6 +217,18 @@ export default withPageAuthRequired(function Office() {
                 {role === Role.VWD && (
                   <Td>
                     <Button colorScheme="red" onClick={() => deleteRow(index)}>
+                      Delete
+                    </Button>
+                  </Td>
+                )}
+                {role != Role.VWD && (
+                  <Td>
+                    <Button
+                      colorScheme="gray"
+                      onClick={() =>
+                        deleteErrorToastFn({ message: "delete Expenses" })
+                      }
+                    >
                       Delete
                     </Button>
                   </Td>
