@@ -47,7 +47,12 @@ export default withPageAuthRequired(function PurchasesPage() {
       const data = await response.json();
       setInvoices(data);
     };
-
+    const fetchPlainPurchases = async () => {
+      const response = await fetch("/api/purchases");
+      const data = await response.json();
+      setPurchases(data);
+    };
+    fetchPlainPurchases();
     fetchInvoices();
   }, []);
 
@@ -55,10 +60,10 @@ export default withPageAuthRequired(function PurchasesPage() {
     const newPurchase = {
       date: new Date(),
       vendor: "",
-      grams: 0,
-      weight: 0,
-      pricePerCt: 0,
-      amount: 0,
+      grams: 0.0,
+      weight: 0.0,
+      pricePerCt: 0.0,
+      amount: 0.0,
     };
 
     try {
