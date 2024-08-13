@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from "react";
 import {
   Box,
   Button,
@@ -13,14 +13,14 @@ import {
   Input,
   VStack,
   Heading,
-} from '@chakra-ui/react';
-import ReactSelect, { Option } from '../components/ReactSelect';
-import { withPageAuthRequired } from '@auth0/nextjs-auth0/client';
-import useGfjRoles from '../components/useGfjRoles';
-import Role from '../components/RoleConstants';
-import useWriteLog from '../components/useSSLogs';
-import useDeleteErrorToast from '../components/useDeleteErrorToast';
-import useMetalSpreadsheet from '../components/useMetalBackup';
+} from "@chakra-ui/react";
+import ReactSelect, { Option } from "../components/ReactSelect";
+import { withPageAuthRequired } from "@auth0/nextjs-auth0/client";
+import useGfjRoles from "../components/useGfjRoles";
+import Role from "../components/RoleConstants";
+import useWriteLog from "../components/useSSLogs";
+import useDeleteErrorToast from "../components/useDeleteErrorToast";
+import useMetalSpreadsheet from "../components/useMetalBackup";
 
 interface RowData {
   id?: number;
@@ -35,16 +35,16 @@ interface RowData {
 }
 
 const metalTypes: Option[] = [
-  { value: 'Gold', label: 'Gold' },
-  { value: 'Silver', label: 'Silver' },
-  { value: '', label: '' },
+  { value: "Gold", label: "Gold" },
+  { value: "Silver", label: "Silver" },
+  { value: "", label: "" },
 ];
 
 const vendorTypes: Option[] = [
-  { value: 'Swastik Enterprises', label: 'Swastik Enterprises' },
-  { value: 'Pioneer Corporation', label: 'Pioneer Corporation' },
-  { value: 'Narnoli Corporation', label: 'Narnoli Corporation' },
-  { value: '', label: '' },
+  { value: "Swastik Enterprises", label: "Swastik Enterprises" },
+  { value: "Pioneer Corporation", label: "Pioneer Corporation" },
+  { value: "Narnoli Corporation", label: "Narnoli Corporation" },
+  { value: "", label: "" },
 ];
 
 export default withPageAuthRequired(function MetalInput() {
@@ -55,11 +55,11 @@ export default withPageAuthRequired(function MetalInput() {
   useEffect(() => {
     const fetchRows = async () => {
       try {
-        console.log('Fetching data...');
-        const response = await fetch('/api/metal-purchases');
-        if (!response.ok) throw new Error('Failed to fetch data');
+        console.log("Fetching data...");
+        const response = await fetch("/api/metal-purchases");
+        if (!response.ok) throw new Error("Failed to fetch data");
         const data: RowData[] = await response.json();
-        console.log('Data fetched:', data);
+        console.log("Data fetched:", data);
         setRows(
           data.map((d) => ({
             ...d,
@@ -68,7 +68,7 @@ export default withPageAuthRequired(function MetalInput() {
           }))
         );
       } catch (error) {
-        console.error('Fetch error:', error);
+        console.error("Fetch error:", error);
       }
     };
 
@@ -79,37 +79,37 @@ export default withPageAuthRequired(function MetalInput() {
     const newRow: RowData = {
       date: getFormattedDate(),
       metalType: null,
-      rate: '',
-      grams: '',
-      amount: '',
+      rate: "",
+      grams: "",
+      amount: "",
       vendor: null,
-      paid: '',
+      paid: "",
       dirty: false,
     };
 
     try {
-      console.log('Adding new row...');
+      console.log("Adding new row...");
 
-      const response = await fetch('/api/metal-purchases', {
-        method: 'POST',
+      const response = await fetch("/api/metal-purchases", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           ...newRow,
-          metalType: newRow.metalType?.value || '',
-          vendor: newRow.vendor?.value || '',
+          metalType: newRow.metalType?.value || "",
+          vendor: newRow.vendor?.value || "",
         }),
       });
-      if (!response.ok) throw new Error('Failed to add row');
+      if (!response.ok) throw new Error("Failed to add row");
       const savedRow: RowData = await response.json();
-      console.log('New row added:', savedRow);
+      console.log("New row added:", savedRow);
       setRows([
         { ...savedRow, metalType: null, vendor: null }, // Adjust for Option types
         ...rows,
       ]);
     } catch (error) {
-      console.error('Add row error:', error);
+      console.error("Add row error:", error);
     }
   };
 
@@ -132,18 +132,17 @@ export default withPageAuthRequired(function MetalInput() {
         const response = await fetch(
           `/api/metal-purchases?id=${rowToDelete.id}`,
           {
-            method: 'DELETE',
+            method: "DELETE",
           }
         );
-        if (!response.ok) throw new Error('Failed to delete row');
-        console.log('Row deleted:', rowToDelete.id);
+        if (!response.ok) throw new Error("Failed to delete row");
+        console.log("Row deleted:", rowToDelete.id);
+        const newRows = rows.filter((_, i) => i !== index);
+        setRows(newRows);
       } catch (error) {
-        console.error('Delete row error:', error);
+        console.error("Delete row error:", error);
       }
     }
-
-    const newRows = rows.filter((_, i) => i !== index);
-    setRows(newRows);
   };
 
   const saveRow = async (index: number) => {
@@ -151,56 +150,56 @@ export default withPageAuthRequired(function MetalInput() {
     if (updatedRow.id) {
       try {
         console.log(`Updating row with id ${updatedRow.id}...`);
-        const response = await fetch('/api/metal-purchases', {
-          method: 'PUT',
+        const response = await fetch("/api/metal-purchases", {
+          method: "PUT",
           headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
           },
           body: JSON.stringify({
             ...updatedRow,
-            metalType: updatedRow.metalType?.value || '',
-            vendor: updatedRow.vendor?.value || '',
+            metalType: updatedRow.metalType?.value || "",
+            vendor: updatedRow.vendor?.value || "",
           }),
         });
-        if (!response.ok) throw new Error('Failed to update row');
-        console.log('Row updated:', updatedRow);
+        if (!response.ok) throw new Error("Failed to update row");
+        console.log("Row updated:", updatedRow);
         const newRows = [...rows];
         newRows[index].dirty = false;
         setRows(newRows);
         useWriteLog({
           email,
-          message: 'Metal Input Saved',
+          message: "Metal Input Saved",
           payload: JSON.stringify(updatedRow),
         });
         useMetalSpreadsheet({
           date: updatedRow.date,
-          metalType: updatedRow.metalType?.label || '',
+          metalType: updatedRow.metalType?.label || "",
           rate: updatedRow.rate,
           grams: updatedRow.grams,
           amount: updatedRow.amount,
-          vendor: updatedRow.vendor?.label || '',
+          vendor: updatedRow.vendor?.label || "",
           paid: updatedRow.paid,
         });
       } catch (error) {
-        console.error('Update row error:', error);
+        console.error("Update row error:", error);
       }
     }
   };
 
   function getFormattedDate(): string {
     const months = [
-      'Jan',
-      'Feb',
-      'Mar',
-      'Apr',
-      'May',
-      'Jun',
-      'Jul',
-      'Aug',
-      'Sep',
-      'Oct',
-      'Nov',
-      'Dec',
+      "Jan",
+      "Feb",
+      "Mar",
+      "Apr",
+      "May",
+      "Jun",
+      "Jul",
+      "Aug",
+      "Sep",
+      "Oct",
+      "Nov",
+      "Dec",
     ];
     const date = new Date();
     const day = date.getDate();
@@ -238,10 +237,10 @@ export default withPageAuthRequired(function MetalInput() {
                   <Input
                     value={row.date}
                     onChange={(e) =>
-                      handleInputChange(index, 'date', e.target.value)
+                      handleInputChange(index, "date", e.target.value)
                     }
                     borderColor="black"
-                    _focus={{ boxShadow: 'none', borderColor: 'black' }}
+                    _focus={{ boxShadow: "none", borderColor: "black" }}
                   />
                 </Td>
                 <Td>
@@ -249,7 +248,7 @@ export default withPageAuthRequired(function MetalInput() {
                     options={metalTypes}
                     value={row.metalType}
                     onChange={(value) =>
-                      handleInputChange(index, 'metalType', value)
+                      handleInputChange(index, "metalType", value)
                     }
                     placeholder="Select Metal Type"
                   />
@@ -258,30 +257,30 @@ export default withPageAuthRequired(function MetalInput() {
                   <Input
                     value={row.rate}
                     onChange={(e) =>
-                      handleInputChange(index, 'rate', e.target.value)
+                      handleInputChange(index, "rate", e.target.value)
                     }
                     borderColor="black"
-                    _focus={{ boxShadow: 'none', borderColor: 'black' }}
+                    _focus={{ boxShadow: "none", borderColor: "black" }}
                   />
                 </Td>
                 <Td>
                   <Input
                     value={row.grams}
                     onChange={(e) =>
-                      handleInputChange(index, 'grams', e.target.value)
+                      handleInputChange(index, "grams", e.target.value)
                     }
                     borderColor="black"
-                    _focus={{ boxShadow: 'none', borderColor: 'black' }}
+                    _focus={{ boxShadow: "none", borderColor: "black" }}
                   />
                 </Td>
                 <Td>
                   <Input
                     value={row.amount}
                     onChange={(e) =>
-                      handleInputChange(index, 'amount', e.target.value)
+                      handleInputChange(index, "amount", e.target.value)
                     }
                     borderColor="black"
-                    _focus={{ boxShadow: 'none', borderColor: 'black' }}
+                    _focus={{ boxShadow: "none", borderColor: "black" }}
                   />
                 </Td>
                 <Td>
@@ -289,7 +288,7 @@ export default withPageAuthRequired(function MetalInput() {
                     options={vendorTypes}
                     value={row.vendor}
                     onChange={(value) =>
-                      handleInputChange(index, 'vendor', value)
+                      handleInputChange(index, "vendor", value)
                     }
                     placeholder="Select Vendor"
                   />
@@ -298,10 +297,10 @@ export default withPageAuthRequired(function MetalInput() {
                   <Input
                     value={row.paid}
                     onChange={(e) =>
-                      handleInputChange(index, 'paid', e.target.value)
+                      handleInputChange(index, "paid", e.target.value)
                     }
                     borderColor="black"
-                    _focus={{ boxShadow: 'none', borderColor: 'black' }}
+                    _focus={{ boxShadow: "none", borderColor: "black" }}
                   />
                 </Td>
                 {row.dirty && (
@@ -323,7 +322,7 @@ export default withPageAuthRequired(function MetalInput() {
                     <Button
                       colorScheme="gray"
                       onClick={() =>
-                        deleteErrorToastFn({ message: 'delete Metal Input' })
+                        deleteErrorToastFn({ message: "delete Metal Input" })
                       }
                     >
                       Delete

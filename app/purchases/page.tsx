@@ -164,7 +164,22 @@ export default withPageAuthRequired(function PurchasesPage() {
     }
   };
 
-  const handleAddInvoicePurchase = (invoiceIndex: number) => {
+  const handleDeleteInvoice = async (id: number) => {
+    try {
+      console.log("Deleting invoice with id ", id);
+      const response = await fetch(`/api/invoices?id=${id}`, {
+        method: "DELETE",
+      });
+      if (!response.ok) throw new Error("Failed to delete row");
+      console.log("Invoice deleted:", id);
+      const newRows = invoices.filter((inv, i) => inv.id !== id);
+      setInvoices(newRows);
+    } catch (error) {
+      console.error("Delete invoice error:", error);
+    }
+  };
+
+  const handleAddInvoicePurchase = (invoiceIndex: number, id: number) => {
     const newInvoices = [...invoices];
     if (!newInvoices[invoiceIndex].purchases) {
       newInvoices[invoiceIndex].purchases = [];
@@ -322,7 +337,7 @@ export default withPageAuthRequired(function PurchasesPage() {
       </Button>
       {invoices.map((invoice, invoiceIndex) => (
         <Box
-          key={invoiceIndex}
+          key={invoice.id}
           border="1px solid black"
           borderRadius="md"
           p={4}
@@ -331,12 +346,23 @@ export default withPageAuthRequired(function PurchasesPage() {
         >
           <Text mb={2}>Invoice {invoice.invoiceNumber}</Text>
           <Button
-            onClick={() => handleAddInvoicePurchase(invoiceIndex)}
+            onClick={() => handleAddInvoicePurchase(invoiceIndex, invoice.id)}
             mb={2}
             colorScheme="purple"
           >
             Add Purchase
           </Button>
+          {(!invoice.purchases || invoice.purchases.length === 0) && (
+            <Button
+              aria-label="Delete Invoice"
+              onClick={() => handleDeleteInvoice(invoice.id)}
+              colorScheme="red"
+              mb={2}
+              ml={20}
+            >
+              Delete Empty Invoice
+            </Button>
+          )}
           <Table size="sm" variant="simple">
             <Thead>
               <Tr>
