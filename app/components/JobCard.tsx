@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState } from 'react';
 import {
   Box,
   Button,
@@ -23,13 +23,12 @@ import {
   IconButton,
   Center,
   Stack,
-} from "@chakra-ui/react";
-import { useForm, Controller, UseFormReturn } from "react-hook-form";
-import { DeleteIcon } from "@chakra-ui/icons";
-import ReactSelect, { Option } from "./ReactSelect";
-import Role from "./RoleConstants";
-import axios from "axios";
-import useDeleteErrorToast from "./useDeleteErrorToast";
+} from '@chakra-ui/react';
+import { useForm, Controller } from 'react-hook-form';
+import { DeleteIcon } from '@chakra-ui/icons';
+import ReactSelect, { Option } from './ReactSelect';
+import Role from './RoleConstants';
+import axios from 'axios';
 
 interface JobCardProps {
   id: string;
@@ -39,52 +38,6 @@ interface JobCardProps {
   diamonds: any[];
   onDelete: () => void;
   role: string;
-}
-
-const initialOptions: Option[] = [
-  { value: "Option1", label: "Option1" },
-  { value: "Option2", label: "Option2" },
-];
-
-const editOptions: Option[] = [
-  { value: "Polish", label: "Polish" },
-  { value: "Step2", label: "Step2" },
-  { value: "Step3", label: "Step3" },
-];
-
-const diamondQualityOptions: Option[] = [
-  { value: "Quality1", label: "Quality1" },
-  { value: "Quality2", label: "Quality2" },
-];
-
-interface CastingData {
-  date: string;
-  caster: string;
-  goldSilver: string;
-  castingWeight: string;
-  pureWeight: string;
-}
-
-interface EditData {
-  stepType: string;
-  weightBefore: string;
-  weightAfter: string;
-  polishGuy: string;
-}
-
-interface DiamondData {
-  setterName: string;
-  beforeWeight: string;
-  afterWeight: string;
-  diamondWeight: string;
-  diamondQuality: string;
-  settingDustWeight: string;
-  totalLoss: string;
-  totalNumberDiamondSet: string;
-  totalCt: string;
-  returnCt: string;
-  brokenDiamondNumber: string;
-  brokenDiamondCt: string;
 }
 
 const JobCard: React.FC<JobCardProps> = ({
@@ -97,7 +50,6 @@ const JobCard: React.FC<JobCardProps> = ({
   role,
 }) => {
   const [expanded, setExpanded] = useState(false);
-  const deleteErrorToastFn = useDeleteErrorToast();
   const {
     isOpen: isCastingOpen,
     onOpen: onCastingOpen,
@@ -113,32 +65,32 @@ const JobCard: React.FC<JobCardProps> = ({
     onOpen: onDiamondOpen,
     onClose: onDiamondClose,
   } = useDisclosure();
-  const [castingData, setCastingData] = useState<CastingData[]>(castings);
-  const [editData, setEditData] = useState<EditData[]>(edits);
-  const [diamondData, setDiamondData] = useState<DiamondData[]>(diamonds);
-  const [orderedDiamondsData, setOrderedDiamondsData] = useState<any[]>([]);
+  const [castingData, setCastingData] = useState(castings);
+  const [editData, setEditData] = useState(edits);
+  const [diamondData, setDiamondData] = useState(diamonds);
 
   const { control, handleSubmit, reset } = useForm<CastingData>({
     defaultValues: {
       date: new Date().toISOString().substring(0, 10),
-      caster: "",
-      goldSilver: "",
-      castingWeight: "",
-      pureWeight: "",
+      caster: '',
+      goldSilver: '',
+      castingWeight: '',
+      pureWeight: '',
+      goldRate: '', // Add this line for gold rate
     },
   });
 
   const {
     control: editControl,
     handleSubmit: handleEditSubmit,
-    watch,
     reset: editReset,
   } = useForm<EditData>({
     defaultValues: {
-      stepType: "",
-      weightBefore: "",
-      weightAfter: "",
-      polishGuy: "",
+      stepType: '',
+      weightBefore: '',
+      weightAfter: '',
+      polishGuy: '',
+      cost: '', // Add this line for cost
     },
   });
 
@@ -148,22 +100,21 @@ const JobCard: React.FC<JobCardProps> = ({
     reset: diamondReset,
   } = useForm<DiamondData>({
     defaultValues: {
-      setterName: "",
-      beforeWeight: "",
-      afterWeight: "",
-      diamondWeight: "",
-      diamondQuality: "",
-      settingDustWeight: "",
-      totalLoss: "",
-      totalNumberDiamondSet: "",
-      totalCt: "",
-      returnCt: "",
-      brokenDiamondNumber: "",
-      brokenDiamondCt: "",
+      setterName: '',
+      beforeWeight: '',
+      afterWeight: '',
+      diamondWeight: '',
+      diamondQuality: '',
+      settingDustWeight: '',
+      totalLoss: '',
+      totalNumberDiamondSet: '',
+      totalCt: '',
+      returnCt: '',
+      brokenDiamondNumber: '',
+      brokenDiamondCt: '',
+      diamondCost: '', // Add this line for diamond cost
     },
   });
-
-  const stepType = watch("stepType");
 
   const handleAddCasting = (data: CastingData) => {
     const newCasting = {
@@ -172,15 +123,16 @@ const JobCard: React.FC<JobCardProps> = ({
       goldSilver: data.goldSilver,
       castingWeight: data.castingWeight,
       pureWeight: data.pureWeight,
+      goldRate: data.goldRate, // Include gold rate in the data
     };
-    console.log("Adding new casting:", newCasting); // Log the data being sent
+
     axios
       .post(`/api/jobs/${id}/castings`, newCasting)
       .then((response) => {
         setCastingData([...castingData, response.data]);
       })
       .catch((error) => {
-        console.error("Error adding casting:", error); // Log the error
+        console.error('Error adding casting:', error); // Log the error
       });
 
     reset();
@@ -193,15 +145,16 @@ const JobCard: React.FC<JobCardProps> = ({
       weightBefore: data.weightBefore,
       weightAfter: data.weightAfter,
       polishGuy: data.polishGuy,
+      cost: data.cost, // Include cost in the data
     };
-    console.log("Adding new edit:", newEdit); // Log the data being sent
+
     axios
       .post(`/api/jobs/${id}/edits`, newEdit)
       .then((response) => {
         setEditData([...editData, response.data]);
       })
       .catch((error) => {
-        console.error("Error adding edit:", error); // Log the error
+        console.error('Error adding edit:', error); // Log the error
       });
 
     editReset();
@@ -222,68 +175,33 @@ const JobCard: React.FC<JobCardProps> = ({
       returnCt: data.returnCt,
       brokenDiamondNumber: data.brokenDiamondNumber,
       brokenDiamondCt: data.brokenDiamondCt,
+      diamondCost: data.diamondCost, // Include diamond cost in the data
     };
-    console.log("Adding new diamond:", newDiamond); // Log the data being sent
+
     axios
       .post(`/api/jobs/${id}/diamonds`, newDiamond)
       .then((response) => {
         setDiamondData([...diamondData, response.data]);
       })
       .catch((error) => {
-        console.error("Error adding diamond:", error); // Log the error
+        console.error('Error adding diamond:', error); // Log the error
       });
 
     diamondReset();
     onDiamondClose();
   };
 
-  const handleDeleteRow = (
-    index: number,
-    setData: React.Dispatch<React.SetStateAction<any[]>>,
-    dataType: "casting" | "edit" | "diamond"
-  ) => {
-    let newData;
-    if (dataType === "casting") {
-      newData = castingData.filter((_, i) => i !== index);
-      axios
-        .post("/api/jobs", {
-          id,
-          name,
-          castings: newData,
-          edits: editData,
-          diamonds: diamondData,
-        })
-        .then((response) => {
-          setCastingData(response.data.castings);
-        });
-    } else if (dataType === "edit") {
-      newData = editData.filter((_, i) => i !== index);
-      axios
-        .post("/api/jobs", {
-          id,
-          name,
-          castings: castingData,
-          edits: newData,
-          diamonds: diamondData,
-        })
-        .then((response) => {
-          setEditData(response.data.edits);
-        });
-    } else if (dataType === "diamond") {
-      newData = diamondData.filter((_, i) => i !== index);
-      axios
-        .post("/api/jobs", {
-          id,
-          name,
-          castings: castingData,
-          edits: editData,
-          diamonds: newData,
-        })
-        .then((response) => {
-          setDiamondData(response.data.diamonds);
-        });
-    }
-  };
+  // Calculate the total cost
+  const totalCost =
+    castingData.reduce(
+      (acc, casting) => acc + parseFloat(casting.goldRate || '0'),
+      0
+    ) +
+    editData.reduce((acc, edit) => acc + parseFloat(edit.cost || '0'), 0) +
+    diamondData.reduce(
+      (acc, diamond) => acc + parseFloat(diamond.diamondCost || '0'),
+      0
+    );
 
   return (
     <Box
@@ -305,36 +223,24 @@ const JobCard: React.FC<JobCardProps> = ({
           onClick={onDelete}
         />
       )}
-      {role != Role.VWD && (
-        <IconButton
-          icon={<DeleteIcon />}
-          aria-label="Delete"
-          position="absolute"
-          top="4px"
-          right="4px"
-          colorScheme="gray"
-          onClick={() => deleteErrorToastFn({ message: "can delete jobs" })}
-        />
-      )}
       <Center flexDirection="column" textAlign="center" mb={4}>
-        <Stack direction="column" spacing={2} align="center">
-          <Text fontWeight="bold" fontSize="lg">
-            ID:
-          </Text>
-          <Text fontSize="xl" fontWeight="bold">
-            {id}
-          </Text>
+        <Stack direction="row" spacing={4} align="center">
           <Text fontWeight="bold" fontSize="lg">
             Name:
           </Text>
           <Text fontSize="xl" fontWeight="bold">
             {name}
           </Text>
+          {role === Role.VWD && (
+            <Text fontWeight="bold" fontSize="lg">
+              Total Cost: ${totalCost.toFixed(2)}
+            </Text>
+          )}
         </Stack>
       </Center>
       <HStack spacing={4} justify="center">
         <Button colorScheme="pink" onClick={() => setExpanded(!expanded)}>
-          {expanded ? "Collapse" : "Full Card"}
+          {expanded ? 'Collapse' : 'Full Card'}
         </Button>
         <Button colorScheme="blue" onClick={onCastingOpen}>
           Add Casting
@@ -375,7 +281,7 @@ const JobCard: React.FC<JobCardProps> = ({
                       colorScheme="red"
                       size="sm"
                       onClick={() =>
-                        handleDeleteRow(index, setCastingData, "casting")
+                        handleDeleteRow(index, setCastingData, 'casting')
                       }
                     >
                       Delete
@@ -411,7 +317,7 @@ const JobCard: React.FC<JobCardProps> = ({
                       colorScheme="red"
                       size="sm"
                       onClick={() =>
-                        handleDeleteRow(index, setEditData, "edit")
+                        handleDeleteRow(index, setEditData, 'edit')
                       }
                     >
                       Delete
@@ -463,41 +369,7 @@ const JobCard: React.FC<JobCardProps> = ({
                       colorScheme="red"
                       size="sm"
                       onClick={() =>
-                        handleDeleteRow(index, setDiamondData, "diamond")
-                      }
-                    >
-                      Delete
-                    </Button>
-                  </Td>
-                </Tr>
-              ))}
-            </Tbody>
-          </Table>
-
-          <Text fontWeight="bold" mt={4}>
-            Ordered Diamonds
-          </Text>
-          <Table size="sm" variant="simple">
-            <Thead>
-              <Tr>
-                <Th>Details</Th>
-                <Th>Actions</Th>
-              </Tr>
-            </Thead>
-            <Tbody>
-              {orderedDiamondsData.map((data, index) => (
-                <Tr key={index}>
-                  <Td>{data.details}</Td>
-                  <Td>
-                    <Button
-                      colorScheme="red"
-                      size="sm"
-                      onClick={() =>
-                        handleDeleteRow(
-                          index,
-                          setOrderedDiamondsData,
-                          "diamond"
-                        )
+                        handleDeleteRow(index, setDiamondData, 'diamond')
                       }
                     >
                       Delete
@@ -525,20 +397,12 @@ const JobCard: React.FC<JobCardProps> = ({
                     <Input placeholder="Date" type="date" {...field} />
                   )}
                 />
+
                 <Controller
                   name="caster"
                   control={control}
                   render={({ field }) => (
-                    <ReactSelect
-                      options={initialOptions}
-                      value={
-                        initialOptions.find(
-                          (option) => option.value === field.value
-                        ) || null
-                      }
-                      onChange={(value) => field.onChange(value?.value || "")}
-                      placeholder="Select Caster"
-                    />
+                    <Input placeholder="Caster" {...field} />
                   )}
                 />
                 <Controller
@@ -546,13 +410,13 @@ const JobCard: React.FC<JobCardProps> = ({
                   control={control}
                   render={({ field }) => (
                     <ReactSelect
-                      options={initialOptions}
+                      options={tunchOptions}
                       value={
-                        initialOptions.find(
+                        tunchOptions.find(
                           (option) => option.value === field.value
                         ) || null
                       }
-                      onChange={(value) => field.onChange(value?.value || "")}
+                      onChange={(value) => field.onChange(value?.value || '')}
                       placeholder="Gold Ct./Silver"
                     />
                   )}
@@ -571,6 +435,16 @@ const JobCard: React.FC<JobCardProps> = ({
                     <Input placeholder="Pure Weight" {...field} />
                   )}
                 />
+
+                {role === Role.VWD && (
+                  <Controller
+                    name="goldRate"
+                    control={control}
+                    render={({ field }) => (
+                      <Input placeholder="Gold Rate" {...field} />
+                    )}
+                  />
+                )}
               </VStack>
               <ModalFooter>
                 <Button colorScheme="blue" mr={3} type="submit">
@@ -598,13 +472,20 @@ const JobCard: React.FC<JobCardProps> = ({
                   control={editControl}
                   render={({ field }) => (
                     <ReactSelect
-                      options={editOptions}
+                      options={[
+                        { value: 'Soldering', label: 'Soldering' },
+                        { value: 'Use Wire', label: 'Use Wire' },
+                        { value: 'Runner', label: 'Runner' },
+                        { value: 'Polish', label: 'Polish' },
+                        { value: 'Lazer', label: 'Lazer' },
+                        { value: 'Hammer', label: 'Hammer' },
+                      ]}
                       value={
-                        editOptions.find(
+                        stepOptions.find(
                           (option) => option.value === field.value
                         ) || null
                       }
-                      onChange={(value) => field.onChange(value?.value || "")}
+                      onChange={(value) => field.onChange(value?.value || '')}
                       placeholder="Type of Step"
                     />
                   )}
@@ -623,12 +504,13 @@ const JobCard: React.FC<JobCardProps> = ({
                     <Input placeholder="Weight After" {...field} />
                   )}
                 />
-                {stepType === "Polish" && (
+
+                {role === Role.VWD && (
                   <Controller
-                    name="polishGuy"
+                    name="cost"
                     control={editControl}
                     render={({ field }) => (
-                      <Input placeholder="Polish Guy" {...field} />
+                      <Input placeholder="Cost (if applicable)" {...field} />
                     )}
                   />
                 )}
@@ -686,16 +568,7 @@ const JobCard: React.FC<JobCardProps> = ({
                   name="diamondQuality"
                   control={diamondControl}
                   render={({ field }) => (
-                    <ReactSelect
-                      options={diamondQualityOptions}
-                      value={
-                        diamondQualityOptions.find(
-                          (option) => option.value === field.value
-                        ) || null
-                      }
-                      onChange={(value) => field.onChange(value?.value || "")}
-                      placeholder="Diamond Quality"
-                    />
+                    <Input placeholder="Diamond Quality" {...field} />
                   )}
                 />
                 <Controller
@@ -747,6 +620,16 @@ const JobCard: React.FC<JobCardProps> = ({
                     <Input placeholder="Broken Diamond Ct" {...field} />
                   )}
                 />
+
+                {role === Role.VWD && (
+                  <Controller
+                    name="diamondCost"
+                    control={diamondControl}
+                    render={({ field }) => (
+                      <Input placeholder="Diamond Cost" {...field} />
+                    )}
+                  />
+                )}
               </VStack>
               <ModalFooter>
                 <Button colorScheme="blue" mr={3} type="submit">
