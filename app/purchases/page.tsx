@@ -139,7 +139,6 @@ export default withPageAuthRequired(function PurchasesPage() {
     const newInvoice = {
       invoiceNumber: data.invoiceNumber,
       vendorName: data.vendorName,
-      purchases: [],
     };
 
     try {
@@ -179,32 +178,84 @@ export default withPageAuthRequired(function PurchasesPage() {
     }
   };
 
-  const handleAddInvoicePurchase = (invoiceIndex: number, id: number) => {
-    const newInvoices = [...invoices];
-    if (!newInvoices[invoiceIndex].purchases) {
-      newInvoices[invoiceIndex].purchases = [];
+  const handleAddInvoicePurchase = async (
+    invoiceIndex: number,
+    id: number,
+    vendor: string
+  ) => {
+    const newPurchaseWithInvoice = {
+      invoiceId: id,
+      date: new Date(),
+      vendor: vendor,
+      grams: 0.0,
+      weight: 0.0,
+      pricePerCt: 0.0,
+      amount: 0.0,
+    };
+
+    try {
+      const response = await fetch("/api/invoicepurchases", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(newPurchaseWithInvoice),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to add plain purchase");
+      }
+
+      const savedPurchase = await response.json();
+      const newInvoices = [...invoices];
+      if (!newInvoices[invoiceIndex].purchases) {
+        newInvoices[invoiceIndex].purchases = [];
+      }
+      newInvoices[invoiceIndex].purchases.push(savedPurchase);
+      setInvoices(newInvoices);
+    } catch (error) {
+      console.error("Error adding plain purchase:", error);
     }
-    newInvoices[invoiceIndex].purchases.push({
-      date: "",
-      vendor: "",
-      grams: 0,
-      weight: 0,
-      pricePerCt: 0,
-      amount: 0,
-    });
-    setInvoices(newInvoices);
   };
 
-  const handleDeleteInvoicePurchase = (
+  const handleDeleteInvoicePurchase = async (
     invoiceIndex: number,
-    purchaseIndex: number
+    purchaseId: number
   ) => {
-    const newInvoices = [...invoices];
-    newInvoices[invoiceIndex].purchases = newInvoices[
-      invoiceIndex
-    ].purchases.filter((_, i) => i !== purchaseIndex);
-    setInvoices(newInvoices);
+    try {
+      console.log(`Deleting purchase with id ${purchaseId}...`);
+      const response = await fetch(`/api/invoicepurchases?id=${purchaseId}`, {
+        method: "DELETE",
+      });
+      if (!response.ok) throw new Error("Failed to delete purchase");
+      console.log("Purchase deleted with ID:", purchaseId);
+      const newInvoices = [...invoices];
+      newInvoices[invoiceIndex].purchases = newInvoices[
+        invoiceIndex
+      ].purchases.filter((p) => p.id !== purchaseId);
+      setInvoices(newInvoices);
+    } catch (error) {
+      console.error("Delete purchase error:", error);
+    }
   };
+
+  const handleSaveInvoicePurchaseRow = async (purchase) => {
+    try {
+      console.log(`Updating invoice purchase with id ${purchase.id}...`);
+      const response = await fetch("/api/invoicepurchases", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(purchase),
+      });
+      if (!response.ok) throw new Error("Failed to update row");
+      console.log("Purchase updated with id:", purchase.id);
+    } catch (error) {
+      console.error("Update row error:", error);
+    }
+  };
+
   const UserDiv = () => {
     return (
       user && (
@@ -346,7 +397,13 @@ export default withPageAuthRequired(function PurchasesPage() {
         >
           <Text mb={2}>Invoice {invoice.invoiceNumber}</Text>
           <Button
-            onClick={() => handleAddInvoicePurchase(invoiceIndex, invoice.id)}
+            onClick={() =>
+              handleAddInvoicePurchase(
+                invoiceIndex,
+                invoice.id,
+                invoice.vendorName
+              )
+            }
             mb={2}
             colorScheme="purple"
           >
@@ -378,7 +435,7 @@ export default withPageAuthRequired(function PurchasesPage() {
             <Tbody>
               {invoice.purchases &&
                 invoice.purchases.map((purchase, purchaseIndex) => (
-                  <Tr key={purchaseIndex}>
+                  <Tr key={purchase.id}>
                     <Td>
                       <Input
                         value={purchase.date}
@@ -451,15 +508,22 @@ export default withPageAuthRequired(function PurchasesPage() {
                         }}
                       />
                     </Td>
+                    {purchase.dirty && (
+                      <Td>
+                        <Button
+                          colorScheme="blue"
+                          onClick={() => handleSaveInvoicePurchaseRow(purchase)}
+                        >
+                          Save
+                        </Button>
+                      </Td>
+                    )}
                     <Td>
                       <IconButton
                         aria-label="Delete"
                         icon={<DeleteIcon />}
                         onClick={() =>
-                          handleDeleteInvoicePurchase(
-                            invoiceIndex,
-                            purchaseIndex
-                          )
+                          handleDeleteInvoicePurchase(invoiceIndex, purchase.id)
                         }
                         colorScheme="red"
                       />

@@ -16,6 +16,9 @@ export async function GET(req: NextRequest) {
   }
 }
 
+// Not adding any purchases array following
+// https://www.prisma.io/docs/orm/prisma-client/queries/transactions#nested-writes-support-nested-updates-but-updates-are-not-dependent-writes---should-i-use-the-transaction-api
+// "The most straightforward approach..." - see invoicepurchases route
 export async function POST(req: NextRequest) {
   try {
     const { invoiceNumber, vendorName, purchases } = await req.json();
@@ -23,9 +26,6 @@ export async function POST(req: NextRequest) {
       data: {
         invoiceNumber,
         vendorName,
-        purchases: {
-          create: purchases,
-        },
       },
     });
     return NextResponse.json(invoice);
