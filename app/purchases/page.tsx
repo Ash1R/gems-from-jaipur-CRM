@@ -239,7 +239,11 @@ export default withPageAuthRequired(function PurchasesPage() {
     }
   };
 
-  const handleSaveInvoicePurchaseRow = async (purchase) => {
+  const handleSaveInvoicePurchaseRow = async (
+    purchase,
+    invoiceIndex,
+    purchaseIndex
+  ) => {
     try {
       console.log(`Updating invoice purchase with id ${purchase.id}...`);
       const response = await fetch("/api/invoicepurchases", {
@@ -251,6 +255,9 @@ export default withPageAuthRequired(function PurchasesPage() {
       });
       if (!response.ok) throw new Error("Failed to update row");
       console.log("Purchase updated with id:", purchase.id);
+      const newInvoices = [...invoices];
+      newInvoices[invoiceIndex].purchases[purchaseIndex].dirty = false;
+      setInvoices(newInvoices);
     } catch (error) {
       console.error("Update row error:", error);
     }
@@ -265,6 +272,7 @@ export default withPageAuthRequired(function PurchasesPage() {
       )
     );
   };
+
   return (
     <Box p={4}>
       <a href="/api/auth/login">Login</a> <br />
@@ -441,9 +449,10 @@ export default withPageAuthRequired(function PurchasesPage() {
                         value={purchase.date}
                         onChange={(e) => {
                           const newInvoices = [...invoices];
-                          newInvoices[invoiceIndex].purchases[
-                            purchaseIndex
-                          ].date = e.target.value;
+                          const pToUpdate =
+                            newInvoices[invoiceIndex].purchases[purchaseIndex];
+                          pToUpdate.date = e.target.value;
+                          pToUpdate.dirty = true;
                           setInvoices(newInvoices);
                         }}
                       />
@@ -453,9 +462,10 @@ export default withPageAuthRequired(function PurchasesPage() {
                         value={purchase.vendor}
                         onChange={(e) => {
                           const newInvoices = [...invoices];
-                          newInvoices[invoiceIndex].purchases[
-                            purchaseIndex
-                          ].vendor = e.target.value;
+                          const pToUpdate =
+                            newInvoices[invoiceIndex].purchases[purchaseIndex];
+                          pToUpdate.vendor = e.target.value;
+                          pToUpdate.dirty = true;
                           setInvoices(newInvoices);
                         }}
                       />
@@ -465,9 +475,10 @@ export default withPageAuthRequired(function PurchasesPage() {
                         value={purchase.grams}
                         onChange={(e) => {
                           const newInvoices = [...invoices];
-                          newInvoices[invoiceIndex].purchases[
-                            purchaseIndex
-                          ].grams = e.target.value;
+                          const pToUpdate =
+                            newInvoices[invoiceIndex].purchases[purchaseIndex];
+                          pToUpdate.grams = e.target.value;
+                          pToUpdate.dirty = true;
                           setInvoices(newInvoices);
                         }}
                       />
@@ -477,9 +488,10 @@ export default withPageAuthRequired(function PurchasesPage() {
                         value={purchase.weight}
                         onChange={(e) => {
                           const newInvoices = [...invoices];
-                          newInvoices[invoiceIndex].purchases[
-                            purchaseIndex
-                          ].weight = e.target.value;
+                          const pToUpdate =
+                            newInvoices[invoiceIndex].purchases[purchaseIndex];
+                          pToUpdate.weight = e.target.value;
+                          pToUpdate.dirty = true;
                           setInvoices(newInvoices);
                         }}
                       />
@@ -489,9 +501,10 @@ export default withPageAuthRequired(function PurchasesPage() {
                         value={purchase.pricePerCt}
                         onChange={(e) => {
                           const newInvoices = [...invoices];
-                          newInvoices[invoiceIndex].purchases[
-                            purchaseIndex
-                          ].pricePerCt = e.target.value;
+                          const pToUpdate =
+                            newInvoices[invoiceIndex].purchases[purchaseIndex];
+                          pToUpdate.pricePerCt = e.target.value;
+                          pToUpdate.dirty = true;
                           setInvoices(newInvoices);
                         }}
                       />
@@ -501,9 +514,10 @@ export default withPageAuthRequired(function PurchasesPage() {
                         value={purchase.amount}
                         onChange={(e) => {
                           const newInvoices = [...invoices];
-                          newInvoices[invoiceIndex].purchases[
-                            purchaseIndex
-                          ].amount = e.target.value;
+                          const pToUpdate =
+                            newInvoices[invoiceIndex].purchases[purchaseIndex];
+                          pToUpdate.amount = e.target.value;
+                          pToUpdate.dirty = true;
                           setInvoices(newInvoices);
                         }}
                       />
@@ -512,7 +526,13 @@ export default withPageAuthRequired(function PurchasesPage() {
                       <Td>
                         <Button
                           colorScheme="blue"
-                          onClick={() => handleSaveInvoicePurchaseRow(purchase)}
+                          onClick={() =>
+                            handleSaveInvoicePurchaseRow(
+                              purchase,
+                              invoiceIndex,
+                              purchaseIndex
+                            )
+                          }
                         >
                           Save
                         </Button>

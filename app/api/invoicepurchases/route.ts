@@ -55,7 +55,7 @@ export async function PUT(request: NextRequest) {
   try {
     const body = await request.json();
     const { id, date, vendor, grams, weight, pricePerCt, amount } = body;
-    const updatedPlainPurchase = await prisma.purchaseWithoutInvoices.update({
+    const updatedPlainPurchase = await prisma.purchase.update({
       where: { id },
       data: {
         date,
