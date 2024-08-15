@@ -40,6 +40,39 @@ interface JobCardProps {
   role: string;
 }
 
+interface CastingData {
+  date: string;
+  caster: string;
+  goldSilver: string;
+  castingWeight: string;
+  pureWeight: string;
+  goldRate: string;
+}
+
+interface EditData {
+  stepType: string;
+  weightBefore: string;
+  weightAfter: string;
+  polishGuy: string;
+  cost: string;
+}
+
+interface DiamondData {
+  setterName: string;
+  beforeWeight: string;
+  afterWeight: string;
+  diamondWeight: string;
+  diamondQuality: string;
+  settingDustWeight: string;
+  totalLoss: string;
+  totalNumberDiamondSet: string;
+  totalCt: string;
+  returnCt: string;
+  brokenDiamondNumber: string;
+  brokenDiamondCt: string;
+  diamondCost: string;
+}
+
 const JobCard: React.FC<JobCardProps> = ({
   id,
   name,
