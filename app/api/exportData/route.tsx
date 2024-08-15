@@ -4,7 +4,7 @@ import { JWT } from "google-auth-library";
 import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
-const keys = require("../../../jemsfrom-jaipur-service-account.json");
+const keys = require("../../jemsfrom-jaipur-service-account.json");
 
 const serviceAccountAuth = new JWT({
   email: keys.client_email,
