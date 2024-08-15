@@ -1,15 +1,15 @@
-import { NextResponse } from 'next/server';
-import { GoogleSpreadsheet } from 'google-spreadsheet';
-import { JWT } from 'google-auth-library';
-import { PrismaClient } from '@prisma/client';
+import { NextResponse } from "next/server";
+import { GoogleSpreadsheet } from "google-spreadsheet";
+import { JWT } from "google-auth-library";
+import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
-const keys = require('../../../jemsfrom-jaipur-service-account.json');
+const keys = require("../../../jemsfrom-jaipur-service-account.json");
 
 const serviceAccountAuth = new JWT({
   email: keys.client_email,
   key: keys.private_key,
-  scopes: ['https://www.googleapis.com/auth/spreadsheets'],
+  scopes: ["https://www.googleapis.com/auth/spreadsheets"],
 });
 
 const doc = new GoogleSpreadsheet(
@@ -28,7 +28,7 @@ export async function GET() {
     await doc.loadInfo();
 
     // Export Expense data to a separate sheet
-    const expenseSheet = await clearOrCreateSheet('Expenses');
+    const expenseSheet = await clearOrCreateSheet("Expenses");
     const expenses = await prisma.expense.findMany();
     for (const expense of expenses) {
       await expenseSheet.addRow({
@@ -41,7 +41,7 @@ export async function GET() {
     }
 
     // Export MetalPurchase data to a separate sheet
-    const metalPurchaseSheet = await clearOrCreateSheet('Metal Purchases');
+    const metalPurchaseSheet = await clearOrCreateSheet("Metal Purchases");
     const metalPurchases = await prisma.metalPurchase.findMany();
     for (const purchase of metalPurchases) {
       await metalPurchaseSheet.addRow({
@@ -57,7 +57,7 @@ export async function GET() {
     }
 
     // Export Purchase data to a separate sheet
-    const purchaseSheet = await clearOrCreateSheet('Purchases');
+    const purchaseSheet = await clearOrCreateSheet("Purchases");
     const purchases = await prisma.purchase.findMany();
     for (const purchase of purchases) {
       await purchaseSheet.addRow({
@@ -74,7 +74,7 @@ export async function GET() {
 
     // Export PurchaseWithoutInvoices data to a separate sheet
     const purchaseWithoutInvoicesSheet = await clearOrCreateSheet(
-      'Purchases Without Invoices'
+      "Purchases Without Invoices"
     );
     const purchasesWithoutInvoices =
       await prisma.purchaseWithoutInvoices.findMany();
@@ -92,7 +92,7 @@ export async function GET() {
 
     // Repeat similar code for Job, Casting, Edit, Diamond models with their respective sheets
     // Example:
-    const jobSheet = await clearOrCreateSheet('Jobs');
+    const jobSheet = await clearOrCreateSheet("Jobs");
     const jobs = await prisma.job.findMany({
       include: {
         castings: true,
@@ -151,14 +151,15 @@ export async function GET() {
           returnCt: diamond.returnCt,
           brokenDiamondNumber: diamond.brokenDiamondNumber,
           brokenDiamondCt: diamond.brokenDiamondCt,
+          diamondCost: diamond.diamondCost,
           jobId: diamond.jobId,
         });
       }
     }
 
-    return NextResponse.json({ message: 'Data exported successfully' });
+    return NextResponse.json({ message: "Data exported successfully" });
   } catch (error) {
-    console.error('Error exporting data to Google Sheets:', error);
-    return NextResponse.json({ error: 'Data export failed' }, { status: 500 });
+    console.error("Error exporting data to Google Sheets:", error);
+    return NextResponse.json({ error: "Data export failed" }, { status: 500 });
   }
 }

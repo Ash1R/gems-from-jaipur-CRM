@@ -21,6 +21,7 @@ export async function POST(
     returnCt,
     brokenDiamondNumber,
     brokenDiamondCt,
+    diamondCost,
   } = await req.json();
 
   try {
@@ -38,6 +39,7 @@ export async function POST(
         returnCt,
         brokenDiamondNumber,
         brokenDiamondCt,
+        diamondCost,
         jobId,
       },
     });

@@ -461,6 +461,7 @@ const JobCard: React.FC<JobCardProps> = ({
                   <Td>{data.returnCt}</Td>
                   <Td>{data.brokenDiamondNumber}</Td>
                   <Td>{data.brokenDiamondCt}</Td>
+                  <Td>{data.diamondCost}</Td>
                   <Td>
                     <Button
                       colorScheme="red"
