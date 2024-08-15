@@ -1,12 +1,12 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { Box, VStack, HStack, Text, Heading, Divider } from '@chakra-ui/react';
-import ReactSelect, { Option } from '../components/ReactSelect';
-import { withPageAuthRequired } from '@auth0/nextjs-auth0/client';
-import useGfjRoles from '../components/useGfjRoles';
-import JobCard from '../components/JobCard';
-import NewJobForm from '../components/NewJobForm';
+import { useEffect, useState } from "react";
+import { Box, VStack, HStack, Text, Heading, Divider } from "@chakra-ui/react";
+import ReactSelect, { Option } from "../components/ReactSelect";
+import { withPageAuthRequired } from "@auth0/nextjs-auth0/client";
+import useGfjRoles from "../components/useGfjRoles";
+import JobCard from "../components/JobCard";
+import NewJobForm from "../components/NewJobForm";
 
 export default withPageAuthRequired(function IndexPage() {
   const { email, role } = useGfjRoles();
@@ -25,7 +25,7 @@ export default withPageAuthRequired(function IndexPage() {
   const [nameOptions, setNameOptions] = useState<Option[]>([]);
 
   useEffect(() => {
-    fetch('/api/jobs')
+    fetch("/api/jobs")
       .then((response) => response.json())
       .then((data) => {
         setJobs(data);
@@ -45,10 +45,10 @@ export default withPageAuthRequired(function IndexPage() {
   }, []);
 
   const handleAddJob = (id: string, name: string) => {
-    fetch('/api/jobs', {
-      method: 'POST',
+    fetch("/api/jobs", {
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
       body: JSON.stringify({ id, name, castings: [], edits: [], diamonds: [] }),
     })
@@ -64,9 +64,10 @@ export default withPageAuthRequired(function IndexPage() {
   };
 
   const handleDeleteJob = (id: string) => {
+    console.log("Handle delete is called for job with id ", id);
     fetch(`/api/jobs/${id}`, {
       // Assuming RESTful endpoint
-      method: 'DELETE',
+      method: "DELETE",
     }).then(() => {
       setJobs(jobs.filter((job) => job.id !== id));
       setIdOptions(idOptions.filter((option) => option.value !== id));
