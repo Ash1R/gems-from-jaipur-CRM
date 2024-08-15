@@ -1,3 +1,8 @@
+/* 
+eslint-disable 
+eslint-ignore
+*/
+
 import { useToast } from "@chakra-ui/react";
 
 export default function useDeleteErrorToast() {

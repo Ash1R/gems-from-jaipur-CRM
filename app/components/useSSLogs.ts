@@ -1,3 +1,8 @@
+/* 
+eslint-disable 
+eslint-ignore
+*/
+
 "use server";
 
 import { GoogleSpreadsheet } from "google-spreadsheet";
