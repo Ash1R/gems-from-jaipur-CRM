@@ -17,15 +17,21 @@ const doc = new GoogleSpreadsheet(
   serviceAccountAuth
 );
 
+async function clearOrCreateSheet(title) {
+  const sheet = doc.sheetsByTitle[title] || (await doc.addSheet({ title }));
+  await sheet.clear();
+  return sheet;
+}
+
 export async function GET() {
   try {
     await doc.loadInfo();
-    const sheet = doc.sheetsByIndex[0];
-    await sheet.clear();
 
+    // Export Expense data to a separate sheet
+    const expenseSheet = await clearOrCreateSheet('Expenses');
     const expenses = await prisma.expense.findMany();
     for (const expense of expenses) {
-      await sheet.addRow({
+      await expenseSheet.addRow({
         id: expense.id,
         date: expense.date,
         description: expense.description,
@@ -34,9 +40,11 @@ export async function GET() {
       });
     }
 
+    // Export MetalPurchase data to a separate sheet
+    const metalPurchaseSheet = await clearOrCreateSheet('Metal Purchases');
     const metalPurchases = await prisma.metalPurchase.findMany();
     for (const purchase of metalPurchases) {
-      await sheet.addRow({
+      await metalPurchaseSheet.addRow({
         id: purchase.id,
         date: purchase.date,
         metalType: purchase.metalType,
@@ -48,7 +56,105 @@ export async function GET() {
       });
     }
 
-    // Repeat similar code for other models
+    // Export Purchase data to a separate sheet
+    const purchaseSheet = await clearOrCreateSheet('Purchases');
+    const purchases = await prisma.purchase.findMany();
+    for (const purchase of purchases) {
+      await purchaseSheet.addRow({
+        id: purchase.id,
+        vendor: purchase.vendor,
+        invoiceId: purchase.invoiceId,
+        date: purchase.date,
+        grams: purchase.grams,
+        weight: purchase.weight,
+        pricePerCt: purchase.pricePerCt,
+        amount: purchase.amount,
+      });
+    }
+
+    // Export PurchaseWithoutInvoices data to a separate sheet
+    const purchaseWithoutInvoicesSheet = await clearOrCreateSheet(
+      'Purchases Without Invoices'
+    );
+    const purchasesWithoutInvoices =
+      await prisma.purchaseWithoutInvoices.findMany();
+    for (const purchase of purchasesWithoutInvoices) {
+      await purchaseWithoutInvoicesSheet.addRow({
+        id: purchase.id,
+        date: purchase.date,
+        vendor: purchase.vendor,
+        grams: purchase.grams,
+        weight: purchase.weight,
+        pricePerCt: purchase.pricePerCt,
+        amount: purchase.amount,
+      });
+    }
+
+    // Repeat similar code for Job, Casting, Edit, Diamond models with their respective sheets
+    // Example:
+    const jobSheet = await clearOrCreateSheet('Jobs');
+    const jobs = await prisma.job.findMany({
+      include: {
+        castings: true,
+        diamonds: true,
+        edits: true,
+      },
+    });
+
+    for (const job of jobs) {
+      await jobSheet.addRow({
+        id: job.id,
+        name: job.name,
+      });
+
+      // Casting data
+      const castingSheet = await clearOrCreateSheet(`Castings - ${job.name}`);
+      for (const casting of job.castings) {
+        await castingSheet.addRow({
+          id: casting.id,
+          date: casting.date,
+          caster: casting.caster,
+          goldSilver: casting.goldSilver,
+          castingWeight: casting.castingWeight,
+          pureWeight: casting.pureWeight,
+          jobId: casting.jobId,
+        });
+      }
+
+      // Edit data
+      const editSheet = await clearOrCreateSheet(`Edits - ${job.name}`);
+      for (const edit of job.edits) {
+        await editSheet.addRow({
+          id: edit.id,
+          stepType: edit.stepType,
+          weightBefore: edit.weightBefore,
+          weightAfter: edit.weightAfter,
+          polishGuy: edit.polishGuy,
+          jobId: edit.jobId,
+        });
+      }
+
+      // Diamond data
+      const diamondSheet = await clearOrCreateSheet(`Diamonds - ${job.name}`);
+      for (const diamond of job.diamonds) {
+        await diamondSheet.addRow({
+          id: diamond.id,
+          setterName: diamond.setterName,
+          beforeWeight: diamond.beforeWeight,
+          afterWeight: diamond.afterWeight,
+          diamondWeight: diamond.diamondWeight,
+          diamondQuality: diamond.diamondQuality,
+          settingDustWeight: diamond.settingDustWeight,
+          totalLoss: diamond.totalLoss,
+          totalNumberDiamondSet: diamond.totalNumberDiamondSet,
+          totalCt: diamond.totalCt,
+          returnCt: diamond.returnCt,
+          brokenDiamondNumber: diamond.brokenDiamondNumber,
+          brokenDiamondCt: diamond.brokenDiamondCt,
+          jobId: diamond.jobId,
+        });
+      }
+    }
 
     return NextResponse.json({ message: 'Data exported successfully' });
   } catch (error) {
