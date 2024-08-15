@@ -1,20 +1,14 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
   provider = "postgresql"
-  url = env("DATABASE_URL") // uses connection pooling
+  url      = env("DATABASE_URL")
 }
 
 model Expense {
-  id          Int      @id @default(autoincrement())
+  id          Int    @id @default(autoincrement())
   date        String
   description String
   withdraw    String
@@ -22,7 +16,7 @@ model Expense {
 }
 
 model MetalPurchase {
-  id        Int     @id @default(autoincrement())
+  id        Int    @id @default(autoincrement())
   date      String
   metalType String
   rate      String
@@ -34,40 +28,51 @@ model MetalPurchase {
 
 model Purchase {
   id         Int      @id @default(autoincrement())
+  vendor     String
+  invoiceId  Int?
+  date       DateTime
+  grams      Float
+  weight     Float
+  pricePerCt Float
+  amount     Float
+  invoice    Invoice? @relation(fields: [invoiceId], references: [id])
+}
+
+model PurchaseWithoutInvoices {
+  id         Int      @id @default(autoincrement())
   date       DateTime
   vendor     String
   grams      Float
   weight     Float
   pricePerCt Float
   amount     Float
-  invoiceId  Int?
-  invoice    Invoice? @relation(fields: [invoiceId], references: [id])
 }
 
 model Invoice {
-  id           Int        @id @default(autoincrement())
+  id            Int        @id @default(autoincrement())
   invoiceNumber String
-  vendorName   String
-  purchases    Purchase[]
+  vendorName    String
+  purchases     Purchase[]
 }
 
 model Job {
-  id    String   @id @default(uuid())
-  name  String
+  id       String    @id @default(uuid())
+  name     String
   castings Casting[]
-  edits Edit[]
   diamonds Diamond[]
+  edits    Edit[]
 }
 
 model Casting {
-  id          String @id @default(uuid())
-  date        String
-  caster      String
-  goldSilver  String
+  id            String @id @default(uuid())
+  date          String
+  caster        String
+  goldSilver    String
   castingWeight String
-  pureWeight  String
-  jobId       String
-  job         Job    @relation(fields: [jobId], references: [id])
+  pureWeight    String
+  goldRate      String  // Added field for gold rate
+  jobId         String
+  job           Job    @relation(fields: [jobId], references: [id])
 }
 
 model Edit {
@@ -76,6 +81,7 @@ model Edit {
   weightBefore String
   weightAfter  String
   polishGuy    String
+  cost         String  // Added field for cost
   jobId        String
   job          Job    @relation(fields: [jobId], references: [id])
 }
@@ -94,6 +100,7 @@ model Diamond {
   returnCt              String
   brokenDiamondNumber   String
   brokenDiamondCt       String
+  diamondCost           String  // Added field for diamond cost
   jobId                 String
   job                   Job    @relation(fields: [jobId], references: [id])
 }

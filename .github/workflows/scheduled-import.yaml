@@ -1,0 +1,12 @@
+name: Scheduled Data Export
+
+on:
+  schedule:
+    - cron: '0 0 * * *' # Every day at midnight
+
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Vercel Export Function
+        run: curl -X GET https://your-vercel-app.vercel.app/api/exportData
