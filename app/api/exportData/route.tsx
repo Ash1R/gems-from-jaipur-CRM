@@ -13,7 +13,7 @@ const serviceAccountAuth = new JWT({
 });
 
 const doc = new GoogleSpreadsheet(
-  process.env.GOOGLE_SHEET_ID,
+  process.env.GOOGLE_SHEET_ID!,
   serviceAccountAuth
 );
 
@@ -63,7 +63,7 @@ export async function GET() {
       await purchaseSheet.addRow({
         id: purchase.id,
         vendor: purchase.vendor,
-        invoiceId: purchase.invoiceId,
+        invoiceId: purchase.invoiceId!,
         date: purchase.date,
         grams: purchase.grams,
         weight: purchase.weight,
