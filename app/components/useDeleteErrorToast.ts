@@ -1,6 +1,5 @@
 /* 
 eslint-disable 
-eslint-ignore
 */
 
 import { useToast } from "@chakra-ui/react";
