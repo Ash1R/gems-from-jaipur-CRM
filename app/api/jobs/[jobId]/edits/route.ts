@@ -3,9 +3,13 @@ import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
-export async function POST(req: NextRequest, { params }: { params: { jobId: string } }) {
+export async function POST(
+  req: NextRequest,
+  { params }: { params: { jobId: string } }
+) {
   const { jobId } = params;
-  const { stepType, weightBefore, weightAfter, polishGuy } = await req.json();
+  const { stepType, weightBefore, weightAfter, polishGuy, cost } =
+    await req.json();
 
   try {
     const newEdit = await prisma.edit.create({
@@ -15,6 +19,7 @@ export async function POST(req: NextRequest, { params }: { params: { jobId: stri
         weightAfter,
         polishGuy,
         jobId,
+        cost,
       },
     });
     return NextResponse.json(newEdit);

@@ -49,6 +49,73 @@ const JobCard: React.FC<JobCardProps> = ({
   onDelete,
   role,
 }) => {
+  const tunchOptions = [
+    { value: 'gold ct. / silver', label: 'gold ct. / silver' },
+    { value: 'silver', label: 'silver' },
+    { value: '14 k yellow', label: '14 k yellow' },
+    { value: '10 k yellow', label: '10 k yellow' },
+    { value: '14 k white', label: '14 k white' },
+    { value: '18 k yellow', label: '18 k yellow' },
+    { value: '14 k rose', label: '14 k rose' },
+    { value: '10k yellow white', label: '10k yellow white' },
+    { value: '10k white pink', label: '10k white pink' },
+    { value: '10k white', label: '10k white' },
+    { value: '10k white yellow', label: '10k white yellow' },
+    { value: '14k white', label: '14k white' },
+    { value: '14k yellow', label: '14k yellow' },
+    { value: '14k white pink', label: '14k white pink' },
+    { value: '10 k yellow & white', label: '10 k yellow & white' },
+    { value: '10 k rose & white', label: '10 k rose & white' },
+    { value: '18 k white', label: '18 k white' },
+    { value: '9k white', label: '9k white' },
+    { value: '9k rose', label: '9k rose' },
+    { value: '14 k yellow & white', label: '14 k yellow & white' },
+    { value: '14 k white & yellow', label: '14 k white & yellow' },
+    { value: '22k yellow', label: '22k yellow' },
+    { value: '10k yellow', label: '10k yellow' },
+    { value: '10k pink', label: '10k pink' },
+    { value: '10k yellow rose', label: '10k yellow rose' },
+    { value: '9 k yellow', label: '9 k yellow' },
+    { value: '10 k yellow mix', label: '10 k yellow mix' },
+    { value: '14 k yellow white', label: '14 k yellow white' },
+    { value: '14k yellow rose', label: '14k yellow rose' },
+    { value: '10k rose', label: '10k rose' },
+    { value: '14k pink white', label: '14k pink white' },
+    { value: '18 k rose', label: '18 k rose' },
+    { value: '10 k white & yellow', label: '10 k white & yellow' },
+    { value: '10 k white & rose', label: '10 k white & rose' },
+    { value: '14 yellow', label: '14 yellow' },
+    { value: '18k yellow & white', label: '18k yellow & white' },
+    {
+      value: '10 k yellow & white & rose',
+      label: '10 k yellow & white & rose',
+    },
+    { value: '10 k rose & yellow', label: '10 k rose & yellow' },
+    { value: '10 k pink white', label: '10 k pink white' },
+    { value: '10 k yellow & rose', label: '10 k yellow & rose' },
+    { value: '10 k rose', label: '10 k rose' },
+    { value: '14 k pink white', label: '14 k pink white' },
+    { value: '18k pink', label: '18k pink' },
+    { value: '14 k yellow & white', label: '14 k yellow & white' },
+    { value: '14 k white', label: '14 k white' },
+    { value: '10 k yellow', label: '10 k yellow' },
+    { value: '14 k rose', label: '14 k rose' },
+    { value: '18k rose', label: '18k rose' },
+    { value: '18 k white yellow', label: '18 k white yellow' },
+    { value: '18 k white', label: '18 k white' },
+    { value: '10 k rose', label: '10 k rose' },
+    { value: '14 k rose', label: '14 k rose' },
+    { value: '18k yellow', label: '18k yellow' },
+  ];
+
+  const stepOptions = [
+    { value: 'Soldering', label: 'Soldering' },
+    { value: 'Use Wire', label: 'Use Wire' },
+    { value: 'Runner', label: 'Runner' },
+    { value: 'Polish', label: 'Polish' },
+    { value: 'Lazer', label: 'Lazer' },
+    { value: 'Hammer', label: 'Hammer' },
+  ];
   const [expanded, setExpanded] = useState(false);
   const {
     isOpen: isCastingOpen,
@@ -161,6 +228,54 @@ const JobCard: React.FC<JobCardProps> = ({
     onEditClose();
   };
 
+  const handleDeleteRow = (
+    index: number,
+    setData: React.Dispatch<React.SetStateAction<any[]>>,
+    dataType: 'casting' | 'edit' | 'diamond'
+  ) => {
+    let newData;
+    if (dataType === 'casting') {
+      newData = castingData.filter((_, i) => i !== index);
+      axios
+        .post('/api/jobs', {
+          id,
+          name,
+          castings: newData,
+          edits: editData,
+          diamonds: diamondData,
+        })
+        .then((response) => {
+          setCastingData(response.data.castings);
+        });
+    } else if (dataType === 'edit') {
+      newData = editData.filter((_, i) => i !== index);
+      axios
+        .post('/api/jobs', {
+          id,
+          name,
+          castings: castingData,
+          edits: newData,
+          diamonds: diamondData,
+        })
+        .then((response) => {
+          setEditData(response.data.edits);
+        });
+    } else if (dataType === 'diamond') {
+      newData = diamondData.filter((_, i) => i !== index);
+      axios
+        .post('/api/jobs', {
+          id,
+          name,
+          castings: castingData,
+          edits: editData,
+          diamonds: newData,
+        })
+        .then((response) => {
+          setDiamondData(response.data.diamonds);
+        });
+    }
+  };
+
   const handleAddDiamond = (data: DiamondData) => {
     const newDiamond = {
       setterName: data.setterName,
@@ -194,7 +309,10 @@ const JobCard: React.FC<JobCardProps> = ({
   // Calculate the total cost
   const totalCost =
     castingData.reduce(
-      (acc, casting) => acc + parseFloat(casting.goldRate || '0'),
+      (acc, casting) =>
+        acc +
+        (parseFloat(casting.pureWeight || '0') +
+          parseFloat(casting.goldRate || '0')),
       0
     ) +
     editData.reduce((acc, edit) => acc + parseFloat(edit.cost || '0'), 0) +

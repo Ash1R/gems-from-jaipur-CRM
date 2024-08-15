@@ -3,9 +3,13 @@ import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
-export async function POST(req: NextRequest, { params }: { params: { jobId: string } }) {
+export async function POST(
+  req: NextRequest,
+  { params }: { params: { jobId: string } }
+) {
   const { jobId } = params;
-  const { date, caster, goldSilver, castingWeight, pureWeight } = await req.json();
+  const { date, caster, goldSilver, castingWeight, pureWeight, goldRate } =
+    await req.json();
 
   try {
     const newCasting = await prisma.casting.create({
@@ -16,6 +20,7 @@ export async function POST(req: NextRequest, { params }: { params: { jobId: stri
         castingWeight,
         pureWeight,
         jobId,
+        goldRate,
       },
     });
     return NextResponse.json(newCasting);
