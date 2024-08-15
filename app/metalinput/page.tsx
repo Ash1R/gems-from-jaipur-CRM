@@ -34,6 +34,18 @@ interface RowData {
   dirty: boolean;
 }
 
+interface DatabaseRowData {
+  id?: number;
+  date: string;
+  metalType: string;
+  rate: string;
+  grams: string;
+  amount: string;
+  vendor: string;
+  paid: string;
+  dirty: boolean;
+}
+
 const metalTypes: Option[] = [
   { value: "Gold", label: "Gold" },
   { value: "Silver", label: "Silver" },
@@ -58,7 +70,7 @@ export default withPageAuthRequired(function MetalInput() {
         console.log("Fetching data...");
         const response = await fetch("/api/metal-purchases");
         if (!response.ok) throw new Error("Failed to fetch data");
-        const data: RowData[] = await response.json();
+        const data: DatabaseRowData[] = await response.json();
         console.log("Data fetched:", data);
         setRows(
           data.map((d) => ({
