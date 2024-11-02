@@ -335,7 +335,7 @@ const JobCard: React.FC<JobCardProps> = ({
       border="1px solid black"
       borderRadius="md"
       p={4}
-      bg="purple.100"
+      bg="#f0f4f8"
       w="full"
       position="relative"
     >
